@@ -95,6 +95,7 @@ PRODUCT_COPY_FILES += \
 ## Network
 PRODUCT_COPY_FILES += \
     device/samsung/msm7x27a-common/configs/etc/wifi/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
+    device/samsung/msm7x27a-common/configs/etc/wifi/wpa_supplicant_overlay.conf:system/etc/wifi/wpa_supplicant_overlay.conf \
     device/samsung/msm7x27a-common/configs/bin/get_macaddrs:system/bin/get_macaddrs
 
 ## Bluetooth config
