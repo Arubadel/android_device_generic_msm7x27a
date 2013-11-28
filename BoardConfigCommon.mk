@@ -69,6 +69,7 @@ endif
 
 ## ION
 TARGET_USES_ION := true
+BOARD_USE_MHEAP_SCREENSHOT := true
 
 ## media
 TARGET_ENABLE_QC_AV_ENHANCEMENTS := true
