@@ -36,8 +36,8 @@
 	<item>"wlan\\d"</item>
     </string-array>
 
-    <!-- Boolean indicating whether Softap requires reloading AP firmware -->
-    <bool name="config_wifiApFirmwareReload">false</bool>
+    <!-- Boolean indicating whether Softap requires reloading AP firmware
+    <bool name="config_wifiApFirmwareReload">false</bool> -->
 
 
     <!-- This string array should be overridden by the device to present a list of network
@@ -90,8 +90,8 @@
     <!-- The default iface on which to monitor data use -->
     <string name="config_datause_iface">pdp0</string>
 
-    <!-- Is the device LTE capable -->
-    <bool name="config_lte_capable">false</bool>
+    <!-- Is the device LTE capable 
+    <bool name="config_lte_capable">false</bool>-->
 
     <bool name="config_automatic_brightness_available">false</bool>
 

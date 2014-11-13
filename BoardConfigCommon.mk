@@ -24,7 +24,7 @@ TARGET_NO_RADIOIMAGE := true
 ## Platform
 TARGET_ARCH := arm
 TARGET_ARCH_VARIANT := armv7-a-neon
-#TARGET_ARCH_LOWMEM := true
+TARGET_ARCH_LOWMEM := true
 TARGET_BOARD_PLATFORM := msm7x27a
 TARGET_BOARD_PLATFORM_GPU := qcom-adreno200
 TARGET_CPU_ABI := armeabi-v7a
@@ -72,6 +72,7 @@ TARGET_QCOM_AUDIO_VARIANT := caf
 BOARD_USES_LEGACY_ALSA_AUDIO := true
 COMMON_GLOBAL_CFLAGS += -DNO_TUNNELED_SOURCE
 TARGET_HAS_QACT := true
+USE_CUSTOM_AUDIO_POLICY := 1
 
 ## EGL, graphics
 USE_OPENGL_RENDERER := true
@@ -82,6 +83,7 @@ BOARD_EGL_CFG := $(LOCAL_PATH)/configs/etc/egl.cfg
 BOARD_EGL_WORKAROUND_BUG_10194508 := true
 TARGET_RUNNING_WITHOUT_SYNC_FRAMEWORK := true
 TARGET_REQUIRES_SYNCHRONOUS_SETSURFACE := true
+COMMON_GLOBAL_CFLAGS += -DUSE_LEGACY_BLOBS
 
 ## Qualcomm BSP
 TARGET_USES_QCOM_BSP := true
@@ -107,8 +109,8 @@ WIFI_DRIVER_MODULE_ARG := "suspend_mode=3 wow_mode=2 ath6kl_p2p=1 recovery_enabl
 
 ## RIL
 BOARD_USES_LEGACY_RIL := true
-BOARD_PROVIDES_LIBRIL := true
-BOARD_PROVIDES_RIL_REFERENCE := true
+#BOARD_PROVIDES_LIBRIL := true
+#BOARD_PROVIDES_RIL_REFERENCE := true
 BOARD_MOBILEDATA_INTERFACE_NAME := "pdp0"
 BOARD_RIL_CLASS := ../../../$(LOCAL_PATH)/ril/
 COMMON_GLOBAL_CFLAGS += -DRIL_SUPPORTS_SEEK
@@ -153,31 +155,8 @@ TARGET_SYSTEM_PROP := $(LOCAL_PATH)/system.prop
 
 PRODUCT_PREBUILT_WEBVIEWCHROMIUM := yes
 
-BOARD_SEPOLICY_DIRS += \
-       $(LOCAL_PATH)/sepolicy
-
-BOARD_SEPOLICY_UNION += \
-       file_contexts \
-       untrusted_app.te \
-       wpa.te \
-       platform_app.te \
-       sysinit.te \
-       zygote.te \
-       system_server.te \
-       system_app.te \
-       qmuxd.te \
-       surfaceflinger.te \
-       vold.te \
-       mediaserver.te \
-       mm-qcamerad.te \
-       bootanim.te \
-       mpdecision.te \
-       radio.te \
-       rmt_storage.te \
-       netmgrd.te \
-       init.te \
-       rild.te \
-       thermal-engine.te \
+#BOARD_SEPOLICY_DIRS += \
+#       $(LOCAL_PATH)/sepolicy
 
 ## Recovery
 TARGET_RECOVERY_LCD_BACKLIGHT_PATH := \"/sys/class/leds/lcd-backlight/brightness\"
