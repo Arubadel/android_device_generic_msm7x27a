@@ -17,6 +17,12 @@
 #include "android_drv.h"
 #endif
 
+/* Return type for setBand*/
+enum {
+	SEND_CHANNEL_CHANGE_EVENT = 0,
+	DO_NOT_SEND_CHANNEL_CHANGE_EVENT,
+};
+
 typedef struct android_wifi_priv_cmd {
 	char *buf;
 	int used_len;
@@ -31,6 +37,27 @@ static void wpa_driver_send_hang_msg(struct wpa_driver_nl80211_data *drv)
 	if (drv_errors > DRV_NUMBER_SEQUENTIAL_ERRORS) {
 		drv_errors = 0;
 		wpa_msg(drv->ctx, MSG_INFO, WPA_EVENT_DRIVER_STATE "HANGED");
+	}
+}
+
+static void wpa_driver_notify_country_change(void *ctx, char *cmd)
+{
+	if ((os_strncasecmp(cmd, "COUNTRY", 7) == 0) ||
+	    (os_strncasecmp(cmd, "SETBAND", 7) == 0)) {
+		union wpa_event_data event;
+
+		os_memset(&event, 0, sizeof(event));
+		event.channel_list_changed.initiator = REGDOM_SET_BY_USER;
+		if (os_strncasecmp(cmd, "COUNTRY", 7) == 0) {
+			event.channel_list_changed.type = REGDOM_TYPE_COUNTRY;
+			if (os_strlen(cmd) > 9) {
+				event.channel_list_changed.alpha2[0] = cmd[8];
+				event.channel_list_changed.alpha2[1] = cmd[9];
+			}
+		} else {
+			event.channel_list_changed.type = REGDOM_TYPE_UNKNOWN;
+		}
+		wpa_supplicant_event(ctx, EVENT_CHANNEL_LIST_CHANGED, &event);
 	}
 }
 
@@ -60,7 +87,7 @@ int wpa_driver_nl80211_driver_cmd(void *priv, char *cmd, char *buf,
 		memset(&ifr, 0, sizeof(ifr));
 		memset(&priv_cmd, 0, sizeof(priv_cmd));
 		os_memcpy(buf, cmd, strlen(cmd) + 1);
-		os_strncpy(ifr.ifr_name, bss->ifname, IFNAMSIZ);
+		strncpy(ifr.ifr_name, bss->ifname, IFNAMSIZ);
 
 		priv_cmd.buf = buf;
 		priv_cmd.used_len = buf_len;
@@ -71,18 +98,17 @@ int wpa_driver_nl80211_driver_cmd(void *priv, char *cmd, char *buf,
 			wpa_printf(MSG_ERROR, "%s: failed to issue private commands\n", __func__);
 		} else {
 			drv_errors = 0;
+			if((os_strncasecmp(cmd, "SETBAND", 7) == 0) &&
+				ret == DO_NOT_SEND_CHANNEL_CHANGE_EVENT) {
+				return 0;
+			}
+
 			ret = 0;
 			if ((os_strcasecmp(cmd, "LINKSPEED") == 0) ||
 			    (os_strcasecmp(cmd, "RSSI") == 0) ||
-			    (os_strcasecmp(cmd, "GETBAND") == 0) ){
+			    (os_strcasecmp(cmd, "GETBAND") == 0) )
 				ret = strlen(buf);
-			} else if ((os_strncasecmp(cmd, "COUNTRY", 7) == 0) ||
-				   (os_strncasecmp(cmd, "SETBAND", 7) == 0) ||
-				   (os_strncasecmp(cmd, "SETCOUNTRYREV", 13) == 0)) {
-				wpa_printf(MSG_DEBUG, "%s: %s", __func__, cmd);
-				wpa_supplicant_event(drv->ctx,
-					EVENT_CHANNEL_LIST_CHANGED, NULL);
-			} else if (os_strcasecmp(cmd, "P2P_DEV_ADDR") == 0)
+			else if (os_strcasecmp(cmd, "P2P_DEV_ADDR") == 0)
 				wpa_printf(MSG_DEBUG, "%s: P2P: Device address ("MACSTR")",
 					__func__, MAC2STR(buf));
 			else if (os_strcasecmp(cmd, "P2P_SET_PS") == 0)
@@ -97,6 +123,7 @@ int wpa_driver_nl80211_driver_cmd(void *priv, char *cmd, char *buf,
 				wpa_printf(MSG_DEBUG, "%s: cmd:%s buf:%s", __func__, cmd, buf);
 			else
 				wpa_printf(MSG_DEBUG, "%s %s len = %d, %d", __func__, buf, ret, buf_len);
+			wpa_driver_notify_country_change(drv->ctx, cmd);
 		}
 	}
 	return ret;
