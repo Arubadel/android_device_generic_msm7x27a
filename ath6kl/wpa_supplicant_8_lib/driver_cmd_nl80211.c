@@ -10,7 +10,11 @@
  *
  */
 
-#include "hardware_legacy/driver_nl80211.h"
+#include "includes.h"
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <net/if.h>
+#include "driver_nl80211.h"
 #include "wpa_supplicant_i.h"
 #include "config.h"
 #ifdef ANDROID
