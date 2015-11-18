@@ -96,9 +96,6 @@ static bool mbadrc_filter_exists[3];
 static int post_proc_feature_mask = 0;
 static int new_post_proc_feature_mask = 0;
 static bool hpcm_playback_in_progress = false;
-#ifdef QCOM_TUNNEL_LPA_ENABLED
-static bool lpa_playback_in_progress = false;
-#endif
 
 //Pre processing parameters
 static struct tx_iir tx_iir_cfg[9];
@@ -354,11 +351,11 @@ void AudioHardware::closeOutputStream(AudioStreamOut* out) {
 #ifdef QCOM_VOIP_ENABLED
       && mDirectOutput == 0
 #endif
-        && mOutputLPA == 0) || ((mOutput != out)
+        ) || ((mOutput != out)
 #ifdef QCOM_VOIP_ENABLED
       && (mDirectOutput != out)
 #endif
-       && (mOutputLPA != out))) {
+       )) {
         ALOGW("Attempt to close invalid output stream");
     }
     else if (mOutput == out) {
@@ -375,11 +372,6 @@ void AudioHardware::closeOutputStream(AudioStreamOut* out) {
         }
     }
 #endif /*QCOM_VOIP_ENABLED*/
-    else if (mOutputLPA == out) {
-	    ALOGV(" deleting  mOutputLPA \n");
-        delete mOutputLPA;
-        mOutputLPA = 0;
-    }
 }
 
 AudioStreamIn* AudioHardware::openInputStream(
@@ -555,11 +547,7 @@ status_t AudioHardware::setParameters(const String8& keyValuePairs)
 
         ALOGD("SetParam SRS flags=0x%x", to_set);
 
-        if(hpcm_playback_in_progress
-#ifdef QCOM_TUNNEL_LPA_ENABLED
-         || lpa_playback_in_progress
-#endif
-        ) {
+        if(hpcm_playback_in_progress) {
             msm72xx_enable_srs(to_set, true);
         }
 
@@ -1930,11 +1918,7 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input, int outputDevice)
         ret = doAudioRouteOrMute(new_snd_device);
 
         //disable post proc first for previous session
-        if(hpcm_playback_in_progress
-#ifdef QCOM_TUNNEL_LPA_ENABLED
-         || lpa_playback_in_progress
-#endif
-         ) {
+        if(hpcm_playback_in_progress) {
             msm72xx_enable_postproc(false);
 #ifdef SRS_PROCESSING
             msm72xx_enable_srs(SRS_PARAMS_ALL, false);
@@ -1945,11 +1929,7 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input, int outputDevice)
         snd_device = new_snd_device;
         post_proc_feature_mask = new_post_proc_feature_mask;
 
-        if(hpcm_playback_in_progress
-#ifdef QCOM_TUNNEL_LPA_ENABLED
-         || lpa_playback_in_progress
-#endif
-         ){
+        if(hpcm_playback_in_progress) {
             msm72xx_enable_postproc(true);
 #ifdef SRS_PROCESSING
             msm72xx_enable_srs(SRS_PARAMS_ALL, true);
@@ -2578,9 +2558,6 @@ status_t AudioHardware::AudioStreamOutMSM72xx::standby()
     if (!mStandby && mFd >= 0) {
         //disable post processing
         hpcm_playback_in_progress = false;
-#ifdef QCOM_TUNNEL_LPA_ENABLED
-        if(!lpa_playback_in_progress)
-#endif
         {
             msm72xx_enable_postproc(false);
 #ifdef SRS_PROCESSING
