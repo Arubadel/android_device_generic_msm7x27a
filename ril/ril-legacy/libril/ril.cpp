@@ -3523,7 +3523,7 @@ RIL_register (const RIL_RadioFunctions *callbacks, int client_id) {
     if (strcmp(RIL_getRilSocketName(), "rild") == 0) {
         strcpy(rildebug, "rild-debug");
     } else {
-        strcpy(rildebug, "rild-debug1");
+        strcpy(rildebug, "rild-debug2");
     }
 
     s_fdDebug = android_get_control_socket(rildebug);
