@@ -1,0 +1,44 @@
+# graphics
+/dev/genlock            0666    system    system
+/dev/kgsl-3d0           0666    system    system
+/dev/ion                0664    system    system
+
+# radio
+/dev/diag               0666    radio     radio
+/dev/smdcntl0           0640    radio     radio
+/dev/smdcntl1           0640    radio     radio
+/dev/smdcntl2           0640    radio     radio
+/dev/smdcntl3           0640    radio     radio
+/dev/smdcntl4           0640    radio     radio
+/dev/smdcntl5           0640    radio     radio
+/dev/smdcntl6           0640    radio     radio
+/dev/smdcntl7           0640    radio     radio
+/dev/smdcntl8           0640    radio     radio
+/dev/smuxctl32          0640    radio     radio
+/dev/sdioctl0           0640    radio     radio
+/dev/sdioctl1           0640    radio     radio
+/dev/sdioctl2           0640    radio     radio
+/dev/sdioctl3           0640    radio     radio
+/dev/sdioctl4           0640    radio     radio
+/dev/sdioctl5           0640    radio     radio
+/dev/sdioctl6           0640    radio     radio
+/dev/sdioctl7           0640    radio     radio
+/dev/sdioctl8           0640    radio     radio
+/dev/hsicctl0           0640    radio     radio
+/dev/hsicctl1           0640    radio     radio
+/dev/hsicctl2           0640    radio     radio
+/dev/hsicctl3           0640    radio     radio
+
+# audio
+/dev/msm_cad            0660    system    audio
+/dev/msm_fm             0660    system    audio
+/dev/msm_mvs            0660    system    audio
+/dev/msm_pcm_lp_dec     0660    system    audio
+/dev/msm_preproc_ctl    0660    system    audio
+/dev/msm_voicememo      0660    system    audio
+
+# camera
+/dev/media*             0660    system    camera
+/dev/msm_camera/*       0660    system    camera
+/dev/v4l-subdev*        0660    system    camera
+/dev/video*             0660    system    camera
