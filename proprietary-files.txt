@@ -79,6 +79,7 @@ lib/libtilerenderer.so
 ## camera
 lib/hw/camera.msm7627a.so
 lib/liboemcamera.so
+lib/libsecnativefeature.so
 lib/libmmcamera_image_stab.so
 lib/libmmcamera_frameproc.so
 lib/libmmcamera_wavelet_lib.so
