@@ -13,8 +13,8 @@ PRODUCT_AAPT_PREF_CONFIG := hdpi
 # Audio
 PRODUCT_PACKAGES += \
     audio.a2dp.default \
-    audio.primary.msm7627a \
-    audio_policy.msm7627a
+    audio.primary.msm7x27a \
+    audio_policy.msm7x27a
 
 # FM Radio
 PRODUCT_PACKAGES += \
@@ -24,17 +24,17 @@ PRODUCT_PACKAGES += \
 
 # GPS
 PRODUCT_PACKAGES += \
-    gps.msm7627a
+    gps.msm7x27a
 
 # Graphics
 PRODUCT_PACKAGES += \
-    copybit.msm7627a \
-    gralloc.msm7627a \
-    hwcomposer.msm7627a
+    copybit.msm7x27a \
+    gralloc.msm7x27a \
+    hwcomposer.msm7x27a
 
 # Lights
 PRODUCT_PACKAGES += \
-    lights.msm7627a
+    lights.msm7x27a
 
 # Live Wallpapers
 PRODUCT_PACKAGES += \
@@ -43,7 +43,7 @@ PRODUCT_PACKAGES += \
 
 # Power HAL
 PRODUCT_PACKAGES += \
-    power.msm7627a
+    power.msm7x27a
 
 # Video
 PRODUCT_PACKAGES += \

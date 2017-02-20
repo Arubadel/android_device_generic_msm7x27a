@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "audio_policy.msm7627a"
+#define LOG_TAG "audio_policy.msm7x27a"
 //#define LOG_NDEBUG 0
 
 #include <stdint.h>
