@@ -10,6 +10,7 @@ bin/rmt_storage
 bin/fmconfig
 bin/netmgrd
 bin/hostapd
+bin/bccmd
 lib/libdsm.so
 lib/libpbmlib.so
 lib/libdsprofile.so
