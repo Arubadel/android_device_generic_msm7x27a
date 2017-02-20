@@ -1,5 +1,8 @@
 # Copyright 2011 The Android Open Source Project
 
+#AUDIO_POLICY_TEST := true
+#ENABLE_AUDIO_DUMP := true
+
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
@@ -7,8 +10,13 @@ LOCAL_SRC_FILES := \
     audio_hw_hal.cpp \
     HardwarePinSwitching.c
 
+ifeq ($(strip $(TARGET_HAS_QACT)),true)
 LOCAL_SRC_FILES += \
     AudioHardware_cad.cpp
+else
+LOCAL_SRC_FILES += \
+    AudioHardware.cpp
+endif
 
 ifeq ($(BOARD_HAVE_BLUETOOTH),true)
   LOCAL_CFLAGS += -DWITH_A2DP
@@ -39,9 +47,9 @@ ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SHARED_LIBRARIES += libdl
 endif
 
-$(shell mkdir -p $(OUT)/obj/SHARED_LIBRARIES/libaudcal_intermediates/)
-$(shell touch $(OUT)/obj/SHARED_LIBRARIES/libaudcal_intermediates/export_includes)
+ifeq ($(strip $(TARGET_HAS_QACT)),true)
 LOCAL_SHARED_LIBRARIES += libaudcal
+endif
 
 LOCAL_STATIC_LIBRARIES := \
     libmedia_helper \
