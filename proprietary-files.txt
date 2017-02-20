@@ -75,21 +75,6 @@ lib/libqdutils.so
 lib/libqdMetaData.so
 lib/libtilerenderer.so
 
-## audio
-
-lib/soundfx/libaudiopreprocessing.so
-lib/libaudioeq.so
-lib/libaudioalsa.so
-lib/libaudioparameter.so
-lib/libmm-audio-resampler.so
-lib/libaudiopolicy_sec.so
-lib/hw/audio.primary.msm7627a.so
-lib/hw/audio_policy.msm7627a.so
-lib/hw/audio.usb.default.so
-lib/libaudioeffect_jni.so
-lib/libcontrolcsc.so
-lib/libaudcal.so
-
 ## camera
 lib/hw/camera.msm7627a.so
 lib/liboemcamera.so
@@ -183,3 +168,19 @@ lib/libsomxaacd.so
 lib/libsomxmp43d.so
 lib/libsomxaace.so
 lib/libimage-jpeg-enc-omx-comp.so
+
+## Audio
+lib/libaudcal.so
+lib/libaudioparameter.so
+lib/libaudioeq.so
+lib/libmm-audio-resampler.so
+lib/libmvsechocanceler.so
+lib/libSamsungAnimation.so
+lib/libsamsungDiamondVoice.so
+lib/libSamsungPDLComposer_MD.so
+lib/libsamsungpowersound.so
+lib/libsamsungRecord.so
+lib/lib_SamsungRec_V02002.so
+lib/lib_Samsung_Resampler.so
+lib/lib_Samsung_SB_AM_for_ICS_v03008.so
+lib/libsamsungSoundbooster.so

@@ -13,8 +13,8 @@ PRODUCT_AAPT_PREF_CONFIG := hdpi
 # Audio
 PRODUCT_PACKAGES += \
     audio.a2dp.default \
-    audio.primary.msm7x27a \
-    audio_policy.msm7x27a
+    audio.primary.msm7627a \
+    audio_policy.msm7627a
 
 # FM Radio
 PRODUCT_PACKAGES += \
@@ -24,17 +24,17 @@ PRODUCT_PACKAGES += \
 
 # GPS
 PRODUCT_PACKAGES += \
-    gps.msm7x27a
+    gps.msm7627a
 
 # Graphics
 PRODUCT_PACKAGES += \
-    copybit.msm7x27a \
-    gralloc.msm7x27a \
-    hwcomposer.msm7x27a
+    copybit.msm7627a \
+    gralloc.msm7627a \
+    hwcomposer.msm7627a
 
 # Lights
 PRODUCT_PACKAGES += \
-    lights.msm7x27a
+    lights.msm7627a
 
 # Live Wallpapers
 PRODUCT_PACKAGES += \
@@ -43,7 +43,7 @@ PRODUCT_PACKAGES += \
 
 # Power HAL
 PRODUCT_PACKAGES += \
-    power.msm7x27a
+    power.msm7627a
 
 # Video
 PRODUCT_PACKAGES += \
@@ -83,6 +83,10 @@ PRODUCT_COPY_FILES += \
 # Enable repeatable keys in CWM
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.cwm.enable_key_repeat=true
+
+# Audio Shared libs
+PRODUCT_COPY_FILES += \
+    vendor/samsung/msm7627a-common/proprietary/lib/libaudcal.so:obj/lib/libaudcal.so \
 
 $(call inherit-product, frameworks/native/build/phone-hdpi-512-dalvik-heap.mk)
 $(call inherit-product, build/target/product/full.mk)
