@@ -49,7 +49,12 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     libmm-omxcore \
     libOmxCore \
-    libstagefrighthw
+    libstagefrighthw\
+
+# Torch
+
+PRODUCT_PACKAGES += \
+Torch
 
 # Ramdisk
 PRODUCT_COPY_FILES += \
