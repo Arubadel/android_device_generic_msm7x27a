@@ -184,3 +184,6 @@ lib/lib_SamsungRec_V02002.so
 lib/lib_Samsung_Resampler.so
 lib/lib_Samsung_SB_AM_for_ICS_v03008.so
 lib/libsamsungSoundbooster.so
+
+## Lights
+lib/hw/lights.msm7627a.so
