@@ -106,6 +106,10 @@ lib/libchromatix_imx074_preview.so
 lib/libchromatix_imx091_default_video.so
 lib/libchromatix_imx074_video_hd.so
 lib/libchromatix_ov2720_default_video.so
+bin/v4l2-qcamera-app
+bin/mm-qcamera-testsuite-client
+bin/mm-qcamera-test
+bin/mm-qcamera-daemon
 
 ## Omx
 
