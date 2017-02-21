@@ -49,7 +49,8 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     libmm-omxcore \
     libOmxCore \
-    libstagefrighthw\
+    libstagefrighthw \
+    libI420colorconvert \
 
 # Torch
 
