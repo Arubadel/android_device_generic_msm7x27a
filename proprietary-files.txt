@@ -200,3 +200,9 @@ lib/libsamsungSoundbooster.so
 
 ## Lights
 lib/hw/lights.msm7627a.so:lib/hw/lights.msm7x27a.so
+
+## Thermal
+etc/thermald-8x25q-msm2-msm_therm.conf:etc/thermald.conf
+bin/thermald
+lib/libthermalclient.so
+lib/libadc.so

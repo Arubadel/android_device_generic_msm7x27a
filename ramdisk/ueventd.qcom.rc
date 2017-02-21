@@ -104,3 +104,5 @@
 /dev/tty_sdio_00          0660   system     system
 /dev/ttyGS0               0660   system     system
 /dev/i2c-5                0660   media       media
+/dev/oncrpc/*             0660   root       qcom_oncrpc
+/dev/oncrpc/300000ba:00010000  0660   system     drmrpc
