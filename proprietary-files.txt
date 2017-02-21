@@ -51,8 +51,9 @@ lib/libauth.so
 bin/sec-ril
 bin/rild
 bin/qmiproxy
+bin/cnd
+bin/ds_fmc_appd
 lib/libril.so
-lib/libreference-ril.so
 lib/libril-qcril-hook-oem.so
 lib/libsecril-client.so
 lib/libqmi_client_griffon.so
@@ -66,6 +67,8 @@ lib/libqcci_legacy.so
 lib/libatparser.so
 lib/libfactoryutil.so
 lib/libomission_avoidance.so
+lib/libnvaccessor.so
+
 ## graphics
 
 lib/egl/libq3dtools_adreno200.so
