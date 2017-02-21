@@ -39,6 +39,8 @@ rild.libargs=-d /dev/smd0
 ril.subscription.types=NV,RUIM
 ro.telephony.call_ring.multiple=false
 ro.telephony.call_ring.delay=3000
+#persist.dsds.enabled=true
+persist.multisim.config=none
 
 # USB
 persist.sys.usb.config=mtp,adb

@@ -16,6 +16,11 @@ on init
     symlink /storage/sdcard1 /extSdCard
     symlink /storage/sdcard1 /mnt/extSdCard
 
+    # create directory for ril data
+    mkdir /data/misc/radio 0775 radio radio
+    chmod 0775 /data/misc/radio
+    mkdir /data/misc/radio/hatp 0775 radio system
+
 on emmc-fs
     mkdir /efs 0771 radio system
     mkdir /persist 0771 system system
@@ -195,3 +200,8 @@ service ril-daemon1 /system/bin/rild -c 1
      socket rild-debug1 stream 660 radio system
      user root
      group radio cache inet misc audio sdcard_r sdcard_rw qcom_diag log qcom_oncrpc
+
+service secril-daemon /system/bin/sec-ril
+class main
+user root
+group radio cache inet misc audio sdcard_rw diag log

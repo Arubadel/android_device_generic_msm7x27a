@@ -63,7 +63,9 @@ lib/libqmiservices.so
 lib/libqmi.so
 lib/libqmi_csvt_srvc.so
 lib/libqcci_legacy.so
-
+lib/libatparser.so
+lib/libfactoryutil.so
+lib/libomission_avoidance.so
 ## graphics
 
 lib/egl/libq3dtools_adreno200.so
