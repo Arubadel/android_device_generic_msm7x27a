@@ -32,7 +32,6 @@ lib/libgsl.so
 lib/libnv.so
 lib/libmmgsdilib.so
 lib/libDivxDrm.so
-lib/libqmiservices.so
 lib/libmmparser.so
 lib/liboem_rapi.so
 lib/libcm.so
@@ -47,14 +46,23 @@ lib/libmm-abl.so
 lib/libsc-a2xx.so
 lib/libwms.so
 lib/libauth.so
-lib/libqmi.so
+
+#RIl
 bin/sec-ril
 bin/rild
+bin/qmiproxy
 lib/libril.so
-lib/libril-qc-qmi-1.so
 lib/libreference-ril.so
 lib/libril-qcril-hook-oem.so
 lib/libsecril-client.so
+lib/libqmi_client_griffon.so
+lib/libril-qc-qmi-1.so
+lib/libqmi_client_qmux.so
+lib/libcneqmiutils.so
+lib/libqmiservices.so
+lib/libqmi.so
+lib/libqmi_csvt_srvc.so
+lib/libqcci_legacy.so
 
 ## graphics
 
