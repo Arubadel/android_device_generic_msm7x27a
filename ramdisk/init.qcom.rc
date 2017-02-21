@@ -101,10 +101,7 @@ service netmgrd /system/bin/netmgrd
     class main
 
 service thermald /system/bin/thermald -c /system/etc/thermald.conf
-   class late_start
-   user root
-   group root
-   disabled
+    class main
 
 service mpdecision /system/bin/mpdecision --no_sleep --avg_comp
     class main
