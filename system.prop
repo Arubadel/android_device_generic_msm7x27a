@@ -33,7 +33,7 @@ com.qc.hardware=true
 ro.vendor.extension_library=/system/lib/libqc-opt.so
 
 # Telephony
-ro.telephony.ril_class=QualcommSharedRIL
+ro.telephony.ril_class=SamsungQualcommD2RIL
 rild.libpath=/system/lib/libril-qc-qmi-1.so
 rild.libargs=-d /dev/smd0
 ril.subscription.types=NV,RUIM
