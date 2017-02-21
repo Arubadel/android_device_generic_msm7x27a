@@ -36,7 +36,7 @@ lib/libqmiservices.so
 lib/libmmparser.so
 lib/liboem_rapi.so
 lib/libcm.so
-lib/hw/sensors.default.so
+lib/hw/sensors.default.so:lib/hw/sensors.msm7x27a.so
 lib/libdsutils.so
 lib/libidl.so
 lib/libdiag.so
