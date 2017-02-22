@@ -26,16 +26,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     gps.msm7x27a
 
-# Graphics
-PRODUCT_PACKAGES += \
-    copybit.msm7x27a \
-    gralloc.msm7x27a \
-    hwcomposer.msm7x27a
-
-# Lights
-PRODUCT_PACKAGES += \
-    lights.msm7x27a
-
 # Live Wallpapers
 PRODUCT_PACKAGES += \
     LiveWallpapersPicker \
@@ -48,7 +38,6 @@ PRODUCT_PACKAGES += \
 # Video
 PRODUCT_PACKAGES += \
     libmm-omxcore \
-    libOmxCore \
     libstagefrighthw \
     libI420colorconvert \
 
@@ -93,6 +82,16 @@ PRODUCT_PROPERTY_OVERRIDES += \
 # Audio Shared libs
 PRODUCT_COPY_FILES += \
     vendor/samsung/msm7627a-common/proprietary/lib/libaudcal.so:obj/lib/libaudcal.so \
+
+# MTP
+PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
+    persist.sys.usb.config=mtp
+
+# Insecure ADBD
+# (ro.adb.secure=3)
+ADDITIONAL_DEFAULT_PROPERTIES += \
+	ro.adb.secure=0 \
+	persist.service.adb.enable=1
 
 $(call inherit-product, frameworks/native/build/phone-hdpi-512-dalvik-heap.mk)
 $(call inherit-product, build/target/product/full.mk)

@@ -1,6 +1,9 @@
 /*
  * Copyright (C) 2011 The Android Open Source Project
- * Copyright (c) 2012, Code Aurora Forum. All rights reserved.
+ * Copyright (c) 2012, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2013, The CyanogenMod Project
+ * Not a Contribution, Apache license notifications and license are retained
+ * for attribution purposes only.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +18,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "audio_policy.msm7x27a"
+#define LOG_TAG "audio_policy.msm7x30"
 //#define LOG_NDEBUG 0
 
 #include <stdint.h>
@@ -31,6 +34,7 @@
 #include "AudioPolicyCompatClient.h"
 
 namespace android_audio_legacy {
+//using android_audio_legacy::AudioSystem;
 
 extern "C" {
 
@@ -69,7 +73,7 @@ static int ap_set_device_connection_state(struct audio_policy *pol,
 {
     struct qcom_audio_policy *qap = to_qap(pol);
     return qap->apm->setDeviceConnectionState(
-                    (AudioSystem::audio_devices)device,
+                    device,
                     (AudioSystem::device_connection_state)state,
                     device_address);
 }
@@ -81,7 +85,7 @@ static audio_policy_dev_state_t ap_get_device_connection_state(
 {
     const struct qcom_audio_policy *qap = to_cqap(pol);
     return (audio_policy_dev_state_t)qap->apm->getDeviceConnectionState(
-                    (AudioSystem::audio_devices)device,
+                    device,
                     device_address);
 }
 
@@ -91,7 +95,11 @@ static void ap_set_phone_state(struct audio_policy *pol, audio_mode_t state)
     qap->apm->setPhoneState(state);
 }
 
-    /* indicate a change in ringer mode */
+static void ap_set_ringer_mode(struct audio_policy *pol, uint32_t mode,
+                               uint32_t mask)
+{
+    // deprecated, never called
+}
     /* force using a specific device category for the specified usage */
 static void ap_set_force_use(struct audio_policy *pol,
                           audio_policy_force_use_t usage,
@@ -171,14 +179,14 @@ static audio_io_handle_t ap_get_output(struct audio_policy *pol,
                                        audio_stream_type_t stream,
                                        uint32_t sampling_rate,
                                        audio_format_t format,
-                                       uint32_t channels,
+                                       audio_channel_mask_t channelMask,
                                        audio_output_flags_t flags)
 {
     struct qcom_audio_policy *qap = to_qap(pol);
 
     ALOGV("%s: tid %d", __func__, gettid());
     return qap->apm->getOutput((AudioSystem::stream_type)stream,
-                               sampling_rate, format, channels,
+                               sampling_rate,(int) format, channelMask,
                                (AudioSystem::output_flags)flags);
 }
 
@@ -208,11 +216,11 @@ static void ap_release_output(struct audio_policy *pol,
 static audio_io_handle_t ap_get_input(struct audio_policy *pol, audio_source_t inputSource,
                                       uint32_t sampling_rate,
                                       audio_format_t format,
-                                      uint32_t channels,
+                                      audio_channel_mask_t channelMask,
                                       audio_in_acoustics_t acoustics)
 {
     struct qcom_audio_policy *qap = to_qap(pol);
-    return qap->apm->getInput(inputSource, sampling_rate, format, channels,
+    return qap->apm->getInput((int) inputSource, sampling_rate,(int) format, channelMask,
                               (AudioSystem::audio_in_acoustics)acoustics);
 }
 
@@ -300,14 +308,14 @@ static audio_devices_t ap_get_devices_for_stream(const struct audio_policy *pol,
 }
 
 static audio_io_handle_t ap_get_output_for_effect(struct audio_policy *pol,
-                                            struct effect_descriptor_s *desc)
+                                           const struct effect_descriptor_s *desc)
 {
     struct qcom_audio_policy *qap = to_qap(pol);
     return qap->apm->getOutputForEffect(desc);
 }
 
 static int ap_register_effect(struct audio_policy *pol,
-                              struct effect_descriptor_s *desc,
+                              const struct effect_descriptor_s *desc,
                               audio_io_handle_t io,
                               uint32_t strategy,
                               int session,
@@ -334,9 +342,14 @@ static bool ap_is_stream_active(const struct audio_policy *pol,
                                 uint32_t in_past_ms)
 {
     const struct qcom_audio_policy *qap = to_cqap(pol);
-    return qap->apm->isStreamActive(stream, in_past_ms);
+    return qap->apm->isStreamActive((int) stream, in_past_ms);
 }
 
+static bool ap_is_source_active(const struct audio_policy *pol, audio_source_t source)
+{
+    const struct qcom_audio_policy *qap = to_cqap(pol);
+    return qap->apm->isSourceActive(source);
+}
 static int ap_dump(const struct audio_policy *pol, int fd)
 {
     const struct qcom_audio_policy *qap = to_cqap(pol);
@@ -392,6 +405,7 @@ static int create_qcom_ap(const struct audio_policy_device *device,
     qap->policy.unregister_effect = ap_unregister_effect;
     qap->policy.set_effect_enabled = ap_set_effect_enabled;
     qap->policy.is_stream_active = ap_is_stream_active;
+    qap->policy.is_source_active = ap_is_source_active;
     qap->policy.dump = ap_dump;
 
     qap->service = service;

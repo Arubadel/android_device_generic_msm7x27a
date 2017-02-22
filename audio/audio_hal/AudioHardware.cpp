@@ -250,31 +250,40 @@ status_t AudioHardware::initCheck()
     return mInit ? NO_ERROR : NO_INIT;
 }
 
-AudioStreamOut* AudioHardware::openOutputStream(uint32_t devices, audio_output_flags_t flags, int *format, uint32_t *channels,
+AudioStreamOut* AudioHardware::openOutputStream(
+        uint32_t devices,  int *format, uint32_t *channels,
         uint32_t *sampleRate, status_t *status)
+
 {
-    ALOGD("openOutputStream: devices = %u format = %x channels = %u sampleRate = %u flags %x\n",
-         devices, *format, *channels, *sampleRate, flags);
+     ALOGD("AudioHardware::openOutputStream devices %x format %d channels %d samplerate %d",
+        devices, *format, *channels, *sampleRate);
+
+     audio_output_flags_t flags = static_cast<audio_output_flags_t> (*status);
+
+
     { // scope for the lock
-        status_t lStatus;
         Mutex::Autolock lock(mLock);
-#ifdef QCOM_VOIP_ENABLED
+
         // only one output stream allowed
-        if (mOutput && !((flags & AUDIO_OUTPUT_FLAG_DIRECT) && (flags & AUDIO_OUTPUT_FLAG_VOIP_RX))
-                    && !(flags & AUDIO_OUTPUT_FLAG_LPA)) {
+#ifdef WITH_QCOM_VOIP_OVER_MVS
+        if (mOutput && !(flags & AUDIO_OUTPUT_FLAG_DIRECT) ) {
+#else
+        if (mOutput) {
+#endif
             if (status) {
                 *status = INVALID_OPERATION;
             }
             ALOGE(" AudioHardware::openOutputStream Only one output stream allowed \n");
             return 0;
         }
-        if ((flags & AUDIO_OUTPUT_FLAG_DIRECT) && (flags & AUDIO_OUTPUT_FLAG_VOIP_RX)) {
-
+#ifdef WITH_QCOM_VOIP_OVER_MVS
+        status_t lStatus;
+        if(flags & AUDIO_OUTPUT_FLAG_DIRECT) {
             if(mDirectOutput == 0) {
                 // open direct output stream
                 ALOGV(" AudioHardware::openOutputStream Direct output stream \n");
                 AudioStreamOutDirect* out = new AudioStreamOutDirect();
-               lStatus = out->set(this, devices, format, channels, sampleRate);
+                status_t lStatus = out->set(this, devices, format, channels, sampleRate);
                 if (status) {
                     *status = lStatus;
                 }
@@ -286,37 +295,13 @@ AudioStreamOut* AudioHardware::openOutputStream(uint32_t devices, audio_output_f
                     delete out;
                 }
             }
-            else {
+            else
                 ALOGE(" \n AudioHardware::AudioStreamOutDirect is already open");
-            }
             return mDirectOutput;
         }
         else
-#endif /*QCOM_VOIP_ENABLED*/
-	    if (flags & AUDIO_OUTPUT_FLAG_LPA) {
-			status_t err = BAD_VALUE;
-#if 0
-            if (mOutput) {
-                if (status) {
-                  *status = INVALID_OPERATION;
-                }
-                ALOGE(" AudioHardware::openOutputStream Only one output stream allowed \n");
-                return 0;
-            }
-#endif
-            // create new output LPA stream
-            AudioSessionOutLPA* out = new AudioSessionOutLPA(this, devices, *format, *channels,*sampleRate,0,&err);
-            if(err != NO_ERROR) {
-                delete out;
-                out = NULL;
-            }
-            if (status) *status = err;
-            mOutputLPA = out;
-        return mOutputLPA;
-
-        } else {
-#if 0
-            ALOGV(" AudioHardware::openOutputStream AudioStreamOutMSM8x60 output stream \n");
+        {
+            ALOGV(" AudioHardware::openOutputStream AudioStreamOutMSM72xx output stream \n");
             // only one output stream allowed
             if (mOutput) {
                 if (status) {
@@ -325,7 +310,7 @@ AudioStreamOut* AudioHardware::openOutputStream(uint32_t devices, audio_output_f
                 ALOGE(" AudioHardware::openOutputStream Only one output stream allowed \n");
                 return 0;
             }
-#endif
+
             // create new output stream
             AudioStreamOutMSM72xx* out = new AudioStreamOutMSM72xx();
             lStatus = out->set(this, devices, format, channels, sampleRate);
@@ -338,9 +323,23 @@ AudioStreamOut* AudioHardware::openOutputStream(uint32_t devices, audio_output_f
                 delete out;
             }
             return mOutput;
+         }
+     }
+#else
+        // create new output stream
+        AudioStreamOutMSM72xx* out = new AudioStreamOutMSM72xx();
+        status_t lStatus = out->set(this, devices, format, channels, sampleRate);
+        if (status) {
+            *status = lStatus;
+        }
+        if (lStatus == NO_ERROR) {
+            mOutput = out;
+        } else {
+            delete out;
         }
     }
-    return NULL;
+    return mOutput;
+#endif
 }
 
 void AudioHardware::closeOutputStream(AudioStreamOut* out) {

@@ -41,6 +41,7 @@ ro.telephony.call_ring.multiple=false
 ro.telephony.call_ring.delay=3000
 #persist.dsds.enabled=true
 persist.multisim.config=none
+ro.telephony.call_ring.multiple=0
 
 # USB
 persist.sys.usb.config=mtp,adb
