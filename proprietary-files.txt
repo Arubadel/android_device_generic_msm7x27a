@@ -211,3 +211,4 @@ etc/thermald-8x25q-msm2-msm_therm.conf:etc/thermald.conf
 bin/thermald
 lib/libthermalclient.so
 lib/libadc.so
+bin/mpdecision
