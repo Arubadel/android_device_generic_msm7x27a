@@ -10,6 +10,21 @@ DEVICE_PACKAGE_OVERLAYS += device/samsung/delos3geur/overlay
 PRODUCT_AAPT_CONFIG := normal hdpi
 PRODUCT_AAPT_PREF_CONFIG := hdpi
 
+# Graphics
+PRODUCT_PACKAGES += \
+    copybit.msm7x27a \
+    gralloc.msm7x27a \
+    hwcomposer.msm7x27a \
+    libtilerenderer \
+    libEGL_adreno200 \
+    eglsubAndroid \
+    libGLESv1_CM_adreno200 \
+    libGLESv2_adreno200 \
+    libgsl \
+    libOpenVG \
+    libq3dtools_adreno200 \
+    libsc-a2xx \
+
 # Audio
 PRODUCT_PACKAGES += \
     audio.a2dp.default \
