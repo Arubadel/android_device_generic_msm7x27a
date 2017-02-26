@@ -28,7 +28,6 @@ lib/libqdp.so
 lib/libmm-abl-oem.so
 lib/liboncrpc.so
 lib/libdss.so
-lib/libgsl.so
 lib/libnv.so
 lib/libmmgsdilib.so
 lib/libDivxDrm.so
@@ -43,7 +42,6 @@ lib/libgsdi_exp.so
 lib/libdsi_netctrl.so
 lib/libdivxdrmdecrypt.so
 lib/libmm-abl.so
-lib/libsc-a2xx.so
 lib/libwms.so
 lib/libauth.so
 
@@ -77,6 +75,8 @@ lib/egl/libGLESv2_adreno200.so
 lib/egl/eglsubAndroid.so
 lib/egl/libGLESv1_CM_adreno200.so
 lib/libOpenVG.so
+lib/libsc-a2xx.so
+lib/libgsl.so
 lib/hw/gralloc.msm7627a.so:lib/hw/gralloc.msm7x27a.so
 lib/hw/copybit.msm7627a.so:lib/hw/copybit.msm7x27a.so
 lib/hw/hwcomposer.msm7627a.so:lib/hw/hwcomposer.msm7x27a.so
