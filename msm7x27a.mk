@@ -144,6 +144,6 @@ PRODUCT_AAPT_CONFIG := normal mdpi hdpi
 PRODUCT_AAPT_PREF_CONFIG := mdpi
 
 $(call inherit-product, build/target/product/full.mk)
-$(call inherit-product, vendor/samsung/msm7x27a-common/blobs.mk)
+$(call inherit-product-if-exist, vendor/samsung/msm7x27a-common/msm7x27a-common-vendor.mk)
 $(call inherit-product, device/common/gps/gps_eu_supl.mk)
 $(call inherit-product, frameworks/native/build/phone-hdpi-512-dalvik-heap.mk)

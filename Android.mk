@@ -14,7 +14,7 @@
 
 LOCAL_PATH := $(call my-dir)
 
-SAMSUNG_TARGETS := jena jenad trebon delos3geur arubaslim
+SAMSUNG_TARGETS := delos3geur arubaslim
 
 ifneq ($(filter $(SAMSUNG_TARGETS),$(TARGET_DEVICE)),)
 include $(all-subdir-makefiles)
