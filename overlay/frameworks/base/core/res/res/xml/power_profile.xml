@@ -35,13 +35,21 @@
       <value>3</value>
       <value>3</value>
   </array>
-    <array name="cpu.speeds">
-        <value>12000000</value>
-        <value>10000000</value>
-        <value>800000</value>
-        <value>500000</value>
-        <value>200000</value>
-    </array>
+  <array name="cpu.speeds">
+      <value>122880</value>
+      <value>245760</value>
+      <value>320000</value>
+      <value>480000</value>
+      <value>600000</value>
+      <value>800000</value>
+      <value>1008000</value>
+      <value>1056000</value>
+      <value>1113600</value>
+      <value>1152000</value>
+      <value>1190400</value>
+      <value>1228800</value>
+      <value>1267200</value>
+  </array>
   <item name="cpu.idle">1.0</item>
   <array name="cpu.active">
       <value>51</value>

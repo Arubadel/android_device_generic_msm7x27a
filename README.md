@@ -1,31 +1,12 @@
-CyanogenMod 10 device configuration for ZTE Blade III.
+CyanogenMod 10.1 common device configuration for Samsung MSM7x27A devices
 
-http://www.modaco.com/topic/360513-cyanogenmod-10/
+Curently supports:
 
-How to build:
--------------
+	1) Galaxy Core
+	2) Galaxy Win 
 
-Initialize CyanogenMod repo:
+Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
 
-    repo init -u git://github.com/CyanogenMod/android.git -b jellybean
-    repo sync
-
-Add the following to your cm10/.repo/local_manifests/local_manifest.xml and repo sync again:
-
-    <?xml version="1.0" encoding="UTF-8"?>
-    <manifest>
-        <!-- ZTE Blade III -->
-        <project path="device/zte/atlas40" name="KonstaT/android_device_zte_atlas40" revision="jellybean" />
-        <project path="kernel/zte/msm7x27a" name="KonstaT/android_kernel_zte_msm7x27a" revision="jellybean" />
-        <project path="vendor/zte" name="KonstaT/proprietary_vendor_zte" revision="jellybean" />
-
-        <!-- FM Radio -->
-        <project path="hardware/qcom/fm" name="legaCyMod/android_hardware_qcom_fm" revision="jellybean" />
-        <project path="packages/apps/FM2" name="legaCyMod/android_packages_apps_FM2" revision="jellybean" />
-    </manifest>
-
-Compile:
-
-    . build/envsetup.sh
-    brunch atlas40
-
+      http://www.apache.org/licenses/LICENSE-2.0
