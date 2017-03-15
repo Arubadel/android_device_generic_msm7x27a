@@ -16,7 +16,7 @@ public class DeviceSettings extends PreferenceActivity {
 
     private static final String KEY_BUTTON_BACKLIGHT = "button_backlight";
 
-    private static final String BUTTON_BACKLIGHT_FILE = "/sys/class/leds/button-backlight/brightness";
+    private static final String BUTTON_BACKLIGHT_FILE = " /sys/class/sec/sec_touchkey/brightness";
 
     private CheckBoxPreference mButtonBacklight;
 
