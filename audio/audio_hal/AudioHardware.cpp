@@ -18,7 +18,7 @@
 #include <math.h>
 
 //#define LOG_NDEBUG 0
-#define LOG_TAG "AudioHardwareMSM76XXA_CAD"
+#define LOG_TAG "AudioHardwareMSM76XXA"
 #include <utils/Log.h>
 #include <utils/String8.h>
 #include <stdio.h>
@@ -40,6 +40,9 @@ extern "C" {
 #endif
 //#include <media/AudioRecord.h>
 
+#ifdef WITH_QCOM_VOIP_OVER_MVS
+#include <linux/msm_audio_mvs.h>
+#endif
 
 #define COMBO_DEVICE_SUPPORTED // Headset speaker combo device not supported on this target
 #define DUALMIC_KEY "dualmic_enabled"
@@ -122,91 +125,73 @@ static int snd_device = -1;
 #define MVS_DEVICE "/dev/msm_mvs"
 #endif /*QCOM_VOIP_ENABLED*/
 
-static uint32_t SND_DEVICE_CURRENT = -1;
-static uint32_t SND_DEVICE_HANDSET = 0x0;
-static uint32_t SND_DEVICE_HEADSET = 0x3;
-static uint32_t SND_DEVICE_SPEAKER = 0x6;
-static uint32_t SND_DEVICE_TTY_HEADSET = 0x8;
-static uint32_t SND_DEVICE_TTY_VCO = 0x9;
-static uint32_t SND_DEVICE_TTY_HCO = 0xA;
-static uint32_t SND_DEVICE_BT = 0xC;
-static uint32_t SND_DEVICE_IN_S_SADC_OUT_HANDSET = 0x10;
-static uint32_t SND_DEVICE_IN_S_SADC_OUT_SPEAKER_PHONE = 0x19;
-static uint32_t SND_DEVICE_FM_DIGITAL_STEREO_HEADSET = 0x1A;
-static uint32_t SND_DEVICE_FM_DIGITAL_SPEAKER_PHONE = 0x1B;
-static uint32_t SND_DEVICE_FM_DIGITAL_BT_A2DP_HEADSET = 0x1C;
-static uint32_t SND_DEVICE_STEREO_HEADSET_AND_SPEAKER = 0x1F;
-static uint32_t SND_DEVICE_FM_ANALOG_STEREO_HEADSET = 0x23;
-static uint32_t SND_DEVICE_FM_ANALOG_STEREO_HEADSET_CODEC = 0x24;
-
-static uint32_t CAD_HW_DEVICE_ID_NONE = -1;
-static uint32_t CAD_HW_DEVICE_ID_HANDSET_RX = -1;
-static uint32_t CAD_HW_DEVICE_ID_HANDSET_TX = -1;
-static uint32_t CAD_HW_DEVICE_ID_HEADSET_CALL_RX = -1;
-static uint32_t CAD_HW_DEVICE_ID_HEADSET_CALL_TX = -1;
-static uint32_t CAD_HW_DEVICE_ID_SPEAKER_CALL_RX = -1;
-static uint32_t CAD_HW_DEVICE_ID_SPEAKER_CALL_TX = -1;
-static uint32_t CAD_HW_DEVICE_ID_BT_CALL_RX = -1;
-static uint32_t CAD_HW_DEVICE_ID_BT_CALL_TX = -1;
-static uint32_t CAD_HW_DEVICE_ID_HEADSET_AND_SPEAKER_RX = -1;
-static uint32_t CAD_HW_DEVICE_ID_MP3_SPEAKER_RX = -1;
-static uint32_t CAD_HW_DEVICE_ID_MP3_SPEAKER_TX = -1;
-static uint32_t CAD_HW_DEVICE_ID_MP3_HEADSET_RX = -1;
-static uint32_t CAD_HW_DEVICE_ID_MP3_HEADSET_TX = -1;
-static uint32_t CAD_HW_DEVICE_ID_FM_DIGITAL_STEREO_HEADSET = -1;
-static uint32_t CAD_HW_DEVICE_ID_FM_DIGITAL_SPEAKER_PHONE = -1;
-static uint32_t CAD_HW_DEVICE_ID_FM_ANALOG_STEREO_HEADSET = -1;
-static uint32_t CAD_HW_DEVICE_ID_FM_ANALOG_STEREO_HEADSET_CODEC = -1;
-
-static uint32_t CAD_HW_DEVICE_ID_CURRENT_RX = -1;
-static uint32_t CAD_HW_DEVICE_ID_CURRENT_TX = -1;
-static cad_device_path_type CAD_HW_DEVICE_ID_CURRENT_PATH = CAD_DEVICE_PATH_RX_TX;
+static uint32_t SND_DEVICE_CURRENT=-1;
+static uint32_t SND_DEVICE_HANDSET=-1;
+static uint32_t SND_DEVICE_SPEAKER=-1;
+static uint32_t SND_DEVICE_BT=-1;
+static uint32_t SND_DEVICE_BT_EC_OFF=-1;
+static uint32_t SND_DEVICE_HEADSET=-1;
+static uint32_t SND_DEVICE_STEREO_HEADSET_AND_SPEAKER=-1;
+static uint32_t SND_DEVICE_IN_S_SADC_OUT_HANDSET=-1;
+static uint32_t SND_DEVICE_IN_S_SADC_OUT_SPEAKER_PHONE=-1;
+static uint32_t SND_DEVICE_TTY_HEADSET=-1;
+static uint32_t SND_DEVICE_TTY_HCO=-1;
+static uint32_t SND_DEVICE_TTY_VCO=-1;
+static uint32_t SND_DEVICE_CARKIT=-1;
+static uint32_t SND_DEVICE_FM_SPEAKER=-1;
+static uint32_t SND_DEVICE_FM_HEADSET=-1;
+static uint32_t SND_DEVICE_NO_MIC_HEADSET=-1;
+static uint32_t SND_DEVICE_FM_DIGITAL_STEREO_HEADSET=-1;
+static uint32_t SND_DEVICE_FM_DIGITAL_SPEAKER_PHONE=-1;
+static uint32_t SND_DEVICE_FM_DIGITAL_BT_A2DP_HEADSET=-1;
+static uint32_t SND_DEVICE_FM_ANALOG_STEREO_HEADSET=-1;
+static uint32_t SND_DEVICE_FM_ANALOG_STEREO_HEADSET_CODEC=-1;
 // ----------------------------------------------------------------------------
 
 AudioHardware::AudioHardware() :
     mInit(false), mMicMute(true), mBluetoothNrec(true), mBluetoothId(0), mTtyMode(TTY_OFF),
-    mOutput(0),mBluetoothVGS(false), mCadEndpoints(NULL), mCurSndDevice(-1), mDualMicEnabled(false)
+    mOutput(0),mBluetoothVGS(false), mSndEndpoints(NULL), mCurSndDevice(-1), mDualMicEnabled(false)
 #ifdef QCOM_FM_ENABLED
     ,mFmFd(-1),FmA2dpStatus(-1)
 #endif
 #ifdef QCOM_VOIP_ENABLED
-,mVoipFd(-1), mVoipInActive(false), mVoipOutActive(false), mDirectOutput(0), mVoipBitRate(0)
-#endif /*QCOM_VOIP_ENABLED*/
+,mVoipFd(-1), mVoipInActive(false), mVoipOutActive(false), mDirectOutput(0), mVoipBitRate(0),
+mDirectOutrefCnt(0)
+ #endif /*QCOM_VOIP_ENABLED*/
 {
    if (get_audpp_filter() == 0) {
            audpp_filter_inited = true;
    }
 
-    m7xsnddriverfd = open("/dev/msm_cad", O_RDWR);
+    m7xsnddriverfd = open("/dev/msm_snd", O_RDWR);
     if (m7xsnddriverfd >= 0) {
-        int rc = ioctl(m7xsnddriverfd, CAD_GET_NUM_ENDPOINTS, &mNumCadEndpoints);
+        int rc = ioctl(m7xsnddriverfd, SND_GET_NUM_ENDPOINTS, &mNumSndEndpoints);
         if (rc >= 0) {
-            mCadEndpoints = new msm_cad_endpoint[mNumCadEndpoints];
+            mSndEndpoints = new msm_snd_endpoint[mNumSndEndpoints];
             mInit = true;
             ALOGV("constructed (%d SND endpoints)", rc);
-            struct msm_cad_endpoint *ept = mCadEndpoints;
-            for (int cnt = 0; cnt < mNumCadEndpoints; cnt++, ept++) {
+            struct msm_snd_endpoint *ept = mSndEndpoints;
+            for (int cnt = 0; cnt < mNumSndEndpoints; cnt++, ept++) {
                 ept->id = cnt;
-                ioctl(m7xsnddriverfd, CAD_GET_ENDPOINT, ept);
+                ioctl(m7xsnddriverfd, SND_GET_ENDPOINT, ept);
                 ALOGV("cnt = %d ept->name = %s ept->id = %d\n", cnt, ept->name, ept->id);
-#define CHECK_FOR(desc) if (!strcmp(ept->name, #desc)) CAD_HW_DEVICE_ID_##desc = ept->id;
-                CHECK_FOR(NONE);
-                CHECK_FOR(HANDSET_RX);
-                CHECK_FOR(HANDSET_TX);
-                CHECK_FOR(HEADSET_CALL_RX);
-                CHECK_FOR(HEADSET_CALL_TX);
-                CHECK_FOR(SPEAKER_CALL_RX);
-                CHECK_FOR(SPEAKER_CALL_TX);
-                CHECK_FOR(BT_CALL_RX);
-                CHECK_FOR(BT_CALL_TX);
-                CHECK_FOR(HEADSET_AND_SPEAKER_RX);
-                CHECK_FOR(MP3_SPEAKER_RX);
-                CHECK_FOR(MP3_SPEAKER_TX);
-                CHECK_FOR(MP3_HEADSET_RX);
-                CHECK_FOR(MP3_HEADSET_TX);
+#define CHECK_FOR(desc) if (!strcmp(ept->name, #desc)) SND_DEVICE_##desc = ept->id;
+                CHECK_FOR(CURRENT);
+                CHECK_FOR(HANDSET);
+                CHECK_FOR(SPEAKER);
+                CHECK_FOR(BT);
+                CHECK_FOR(BT_EC_OFF);
+                CHECK_FOR(HEADSET);
+                CHECK_FOR(STEREO_HEADSET_AND_SPEAKER);
+                CHECK_FOR(IN_S_SADC_OUT_HANDSET);
+                CHECK_FOR(IN_S_SADC_OUT_SPEAKER_PHONE);
+                CHECK_FOR(TTY_HEADSET);
+                CHECK_FOR(TTY_HCO);
+                CHECK_FOR(TTY_VCO);
 #ifdef QCOM_FM_ENABLED
                 CHECK_FOR(FM_DIGITAL_STEREO_HEADSET);
                 CHECK_FOR(FM_DIGITAL_SPEAKER_PHONE);
+                CHECK_FOR(FM_DIGITAL_BT_A2DP_HEADSET);
                 CHECK_FOR(FM_ANALOG_STEREO_HEADSET);
                 CHECK_FOR(FM_ANALOG_STEREO_HEADSET_CODEC);
 #endif
@@ -215,6 +200,45 @@ AudioHardware::AudioHardware() :
         }
         else ALOGE("Could not retrieve number of MSM SND endpoints.");
 
+        int AUTO_VOLUME_ENABLED = 0; // setting disabled as default
+
+        static const char *const path = "/system/etc/AutoVolumeControl.txt";
+        int txtfd;
+        struct stat st;
+        char *read_buf;
+
+        txtfd = open(path, O_RDONLY);
+        if (txtfd < 0) {
+            ALOGE("failed to open AUTO_VOLUME_CONTROL %s: %s (%d)",
+                  path, strerror(errno), errno);
+        }
+        else {
+            if (fstat(txtfd, &st) < 0) {
+                ALOGE("failed to stat %s: %s (%d)",
+                      path, strerror(errno), errno);
+                close(txtfd);
+            }
+
+            read_buf = (char *) mmap(0, st.st_size,
+                        PROT_READ | PROT_WRITE,
+                        MAP_PRIVATE,
+                        txtfd, 0);
+
+            if (read_buf == MAP_FAILED) {
+                ALOGE("failed to mmap parameters file: %s (%d)",
+                      strerror(errno), errno);
+                close(txtfd);
+            }
+
+            if(read_buf[0] =='1')
+               AUTO_VOLUME_ENABLED = 1;
+
+            munmap(read_buf, st.st_size);
+            close(txtfd);
+        }
+        ALOGD("Auto Volume Enabled= %d", AUTO_VOLUME_ENABLED);
+        ioctl(m7xsnddriverfd, SND_AVC_CTL, &AUTO_VOLUME_ENABLED);
+        ioctl(m7xsnddriverfd, SND_AGC_CTL, &AUTO_VOLUME_ENABLED);
     } else
         ALOGE("Could not open MSM SND driver.");
 }
@@ -250,58 +274,80 @@ status_t AudioHardware::initCheck()
     return mInit ? NO_ERROR : NO_INIT;
 }
 
-AudioStreamOut* AudioHardware::openOutputStream(
-        uint32_t devices,  int *format, uint32_t *channels,
-        uint32_t *sampleRate, status_t *status)
-
+AudioStreamOut* AudioHardware::openOutputStream(uint32_t devices, int *format, uint32_t *channels, uint32_t *sampleRate, status_t *status)
 {
-     ALOGD("AudioHardware::openOutputStream devices %x format %d channels %d samplerate %d",
-        devices, *format, *channels, *sampleRate);
+    audio_output_flags_t flags = static_cast<audio_output_flags_t> (*status);
 
-     audio_output_flags_t flags = static_cast<audio_output_flags_t> (*status);
-
-
+    ALOGD("openOutputStream: devices = %u format = %x channels = %u sampleRate = %u flags %x\n",
+         devices, *format, *channels, *sampleRate, flags);
     { // scope for the lock
+        status_t lStatus;
         Mutex::Autolock lock(mLock);
-
+#ifdef QCOM_VOIP_ENABLED
         // only one output stream allowed
-#ifdef WITH_QCOM_VOIP_OVER_MVS
-        if (mOutput && !(flags & AUDIO_OUTPUT_FLAG_DIRECT) ) {
-#else
-        if (mOutput) {
-#endif
+        if (mOutput && !((flags & AUDIO_OUTPUT_FLAG_DIRECT) && (flags & AUDIO_OUTPUT_FLAG_VOIP_RX))
+                    && !(flags & AUDIO_OUTPUT_FLAG_LPA)) {
             if (status) {
                 *status = INVALID_OPERATION;
             }
             ALOGE(" AudioHardware::openOutputStream Only one output stream allowed \n");
             return 0;
         }
-#ifdef WITH_QCOM_VOIP_OVER_MVS
-        status_t lStatus;
-        if(flags & AUDIO_OUTPUT_FLAG_DIRECT) {
+        if ((flags & AUDIO_OUTPUT_FLAG_DIRECT) && (flags & AUDIO_OUTPUT_FLAG_VOIP_RX)) {
+
             if(mDirectOutput == 0) {
                 // open direct output stream
                 ALOGV(" AudioHardware::openOutputStream Direct output stream \n");
                 AudioStreamOutDirect* out = new AudioStreamOutDirect();
-                status_t lStatus = out->set(this, devices, format, channels, sampleRate);
+               lStatus = out->set(this, devices, format, channels, sampleRate);
                 if (status) {
                     *status = lStatus;
                 }
                 if (lStatus == NO_ERROR) {
                     mDirectOutput = out;
+                    mDirectOutrefCnt++;
+                    mLock.unlock();
+                    if (mVoipInActive)
+                        setupDeviceforVoipCall(true);
+                    mLock.lock();
                     ALOGV(" \n set sucessful for AudioStreamOutDirect");
                 } else {
                     ALOGE(" \n set Failed for AudioStreamOutDirect");
                     delete out;
                 }
             }
-            else
-                ALOGE(" \n AudioHardware::AudioStreamOutDirect is already open");
+            else {
+               mDirectOutrefCnt++;
+                ALOGE(" \n AudioHardware::AudioStreamOutDirect is already open refCnt %d", mDirectOutrefCnt);
+             }
             return mDirectOutput;
         }
         else
-        {
-            ALOGV(" AudioHardware::openOutputStream AudioStreamOutMSM72xx output stream \n");
+#endif /*QCOM_VOIP_ENABLED*/
+	    if (flags & AUDIO_OUTPUT_FLAG_LPA) {
+			status_t err = BAD_VALUE;
+#if 0
+            if (mOutput) {
+                if (status) {
+                  *status = INVALID_OPERATION;
+                }
+                ALOGE(" AudioHardware::openOutputStream Only one output stream allowed \n");
+                return 0;
+            }
+#endif
+            // create new output LPA stream
+            AudioSessionOutLPA* out = new AudioSessionOutLPA(this, devices, *format, *channels,*sampleRate,0,&err);
+            if(err != NO_ERROR) {
+                delete out;
+                out = NULL;
+            }
+            if (status) *status = err;
+            mOutputLPA = out;
+        return mOutputLPA;
+
+        } else {
+#if 0
+            ALOGV(" AudioHardware::openOutputStream AudioStreamOutMSM8x60 output stream \n");
             // only one output stream allowed
             if (mOutput) {
                 if (status) {
@@ -310,7 +356,7 @@ AudioStreamOut* AudioHardware::openOutputStream(
                 ALOGE(" AudioHardware::openOutputStream Only one output stream allowed \n");
                 return 0;
             }
-
+#endif
             // create new output stream
             AudioStreamOutMSM72xx* out = new AudioStreamOutMSM72xx();
             lStatus = out->set(this, devices, format, channels, sampleRate);
@@ -323,23 +369,9 @@ AudioStreamOut* AudioHardware::openOutputStream(
                 delete out;
             }
             return mOutput;
-         }
-     }
-#else
-        // create new output stream
-        AudioStreamOutMSM72xx* out = new AudioStreamOutMSM72xx();
-        status_t lStatus = out->set(this, devices, format, channels, sampleRate);
-        if (status) {
-            *status = lStatus;
-        }
-        if (lStatus == NO_ERROR) {
-            mOutput = out;
-        } else {
-            delete out;
         }
     }
-    return mOutput;
-#endif
+    return NULL;
 }
 
 void AudioHardware::closeOutputStream(AudioStreamOut* out) {
@@ -361,9 +393,12 @@ void AudioHardware::closeOutputStream(AudioStreamOut* out) {
     }
 #ifdef QCOM_VOIP_ENABLED
     else if (mDirectOutput == out) {
-        ALOGV(" deleting  mDirectOutput \n");
-        delete mDirectOutput;
-        mDirectOutput = 0;
+         mDirectOutrefCnt--;
+        if (mDirectOutrefCnt <= 0) {
+            ALOGV(" deleting  mDirectOutput \n");
+            delete mDirectOutput;
+            mDirectOutput = 0;
+        }
     }
 #endif /*QCOM_VOIP_ENABLED*/
     else if (mOutputLPA == out) {
@@ -387,7 +422,7 @@ AudioStreamIn* AudioHardware::openInputStream(
 
     mLock.lock();
 #ifdef QCOM_VOIP_ENABLED
-    if(devices == AudioSystem::DEVICE_IN_COMMUNICATION && (*sampleRate == 8000)) {
+    if ((devices == AudioSystem::DEVICE_IN_COMMUNICATION) && (*sampleRate == 8000)) {
         ALOGV("Create Audio stream Voip \n");
         AudioStreamInVoip* inVoip = new AudioStreamInVoip();
         status_t lStatus = NO_ERROR;
@@ -403,6 +438,10 @@ AudioStreamIn* AudioHardware::openInputStream(
         }
         mVoipInputs.add(inVoip);
         mLock.unlock();
+        if (mVoipOutActive) {
+            inVoip->mSetupDevice = true;
+            setupDeviceforVoipCall(true);
+        }
         return inVoip;
     } else
 #endif /*QCOM_VOIP_ENABLED*/
@@ -481,7 +520,7 @@ status_t AudioHardware::setMicMute_nosync(bool state)
 {
     if (mMicMute != state) {
         mMicMute = state;
-        return doAudioRouteOrMute(SND_DEVICE_CURRENT, CAD_HW_DEVICE_ID_CURRENT_RX, CAD_HW_DEVICE_ID_CURRENT_TX, CAD_HW_DEVICE_ID_CURRENT_PATH);
+        return doAudioRouteOrMute(SND_DEVICE_CURRENT);
     }
     return NO_ERROR;
 }
@@ -624,11 +663,17 @@ status_t AudioHardware::setParameters(const String8& keyValuePairs)
 }
 #ifdef QCOM_VOIP_ENABLED
 
-uint32_t AudioHardware::getMvsMode(int format)
+uint32_t AudioHardware::getMvsMode(int format, int rate)
 {
     switch(format) {
     case AudioSystem::PCM_16_BIT:
-        return MVS_MODE_PCM;
+         if(rate == AUDIO_HW_VOIP_SAMPLERATE_8K) {
+            return MVS_MODE_PCM;
+        } else if(rate== AUDIO_HW_VOIP_SAMPLERATE_16K) {
+            return MVS_MODE_PCM_WB;
+        } else {
+            return MVS_MODE_PCM;
+        }
         break;
     case AudioSystem::AMR_NB:
         return MVS_MODE_AMR;
@@ -1509,16 +1554,15 @@ size_t AudioHardware::getInputBufferSize(uint32_t sampleRate, int format, int ch
        return 2048*channelCount;
 }
 
-static status_t set_volume_rpc(uint32_t rx_device,
-                               uint32_t tx_device,
+static status_t set_volume_rpc(uint32_t device,
                                uint32_t method,
                                uint32_t volume,
                                int m7xsnddriverfd)
 {
 
-    ALOGD("rpc_snd_set_volume(%d, %d, %d, %d)\n", rx_device, tx_device, method, volume);
+    ALOGD("rpc_snd_set_volume(%d, %d, %d)\n", device, method, volume);
 
-    if (rx_device == -1UL && tx_device == -1UL) return NO_ERROR;
+    if (device == -1UL) return NO_ERROR;
 
     if (m7xsnddriverfd < 0) {
         ALOGE("Can not open snd device");
@@ -1533,13 +1577,12 @@ static status_t set_volume_rpc(uint32_t rx_device,
      *  )
      * rpc_snd_set_volume only works for in-call sound volume.
      */
-     struct msm_cad_volume_config args;
-     args.device.rx_device = rx_device;
-     args.device.tx_device = tx_device;
+     struct msm_snd_volume_config args;
+     args.device = device;
      args.method = method;
      args.volume = volume;
 
-     if (ioctl(m7xsnddriverfd, CAD_SET_VOLUME, &args) < 0) {
+     if (ioctl(m7xsnddriverfd, SND_SET_VOLUME, &args) < 0) {
          ALOGE("snd_set_volume error.");
          return -EIO;
      }
@@ -1555,11 +1598,11 @@ status_t AudioHardware::setVoiceVolume(float v)
         ALOGW("setVoiceVolume(%f) over 1.0, assuming 1.0\n", v);
         v = 1.0;
     }
-    // Added 0.4 to current volume, as in voice call Mute cannot be set as minimum volume(0.00)
+    // Added 0.1 to current volume, as in voice call Mute cannot be set as minimum volume(0.00)
     // setting Rx volume level as 2 for minimum and 7 as max level.
-    v = 0.4 + v;
+    v = 0.1 + v;
 
-    int vol = lrint(v * 5.0);
+    int vol = lrint(v * 3.0);
     ALOGD("setVoiceVolume(%f)\n", v);
     ALOGI("Setting in-call volume to %d (available range is 2 to 7)\n", vol);
 
@@ -1570,7 +1613,7 @@ status_t AudioHardware::setVoiceVolume(float v)
     }
 
     Mutex::Autolock lock(mLock);
-    set_volume_rpc(CAD_HW_DEVICE_ID_CURRENT_RX, CAD_HW_DEVICE_ID_CURRENT_TX, SND_METHOD_VOICE, 7, m7xsnddriverfd);
+    set_volume_rpc(SND_DEVICE_CURRENT, SND_METHOD_VOICE, vol, m7xsnddriverfd);
     return NO_ERROR;
 }
 
@@ -1590,7 +1633,7 @@ status_t AudioHardware::setFmVolume(float v)
         vol = 7;
     ALOGD("setFmVolume(%f)\n", v);
     Mutex::Autolock lock(mLock);
-    set_volume_rpc(CAD_HW_DEVICE_ID_CURRENT_RX, CAD_HW_DEVICE_ID_CURRENT_TX, SND_METHOD_VOICE, vol, m7xsnddriverfd);
+    set_volume_rpc(SND_DEVICE_CURRENT, SND_METHOD_VOICE, vol, m7xsnddriverfd);
     return NO_ERROR;
 }
 #endif
@@ -1600,24 +1643,27 @@ status_t AudioHardware::setMasterVolume(float v)
     Mutex::Autolock lock(mLock);
     int vol = ceil(v * 7.0);
     ALOGI("Set master volume to %d.\n", vol);
-    set_volume_rpc(CAD_HW_DEVICE_ID_HANDSET_RX, CAD_HW_DEVICE_ID_HANDSET_TX, SND_METHOD_VOICE, vol, m7xsnddriverfd);
-    set_volume_rpc(CAD_HW_DEVICE_ID_SPEAKER_CALL_RX, CAD_HW_DEVICE_ID_SPEAKER_CALL_TX, SND_METHOD_VOICE, vol, m7xsnddriverfd);
-    set_volume_rpc(CAD_HW_DEVICE_ID_MP3_SPEAKER_RX, CAD_HW_DEVICE_ID_MP3_SPEAKER_TX, SND_METHOD_VOICE, vol, m7xsnddriverfd);
-    set_volume_rpc(CAD_HW_DEVICE_ID_BT_CALL_RX, CAD_HW_DEVICE_ID_BT_CALL_TX, SND_METHOD_VOICE, vol, m7xsnddriverfd);
-    set_volume_rpc(CAD_HW_DEVICE_ID_HEADSET_CALL_RX, CAD_HW_DEVICE_ID_HEADSET_CALL_TX, SND_METHOD_VOICE, vol, m7xsnddriverfd);
-    set_volume_rpc(CAD_HW_DEVICE_ID_MP3_HEADSET_RX, CAD_HW_DEVICE_ID_MP3_HEADSET_TX, SND_METHOD_VOICE, vol, m7xsnddriverfd);
+    set_volume_rpc(SND_DEVICE_HANDSET, SND_METHOD_VOICE, vol, m7xsnddriverfd);
+    set_volume_rpc(SND_DEVICE_SPEAKER, SND_METHOD_VOICE, vol, m7xsnddriverfd);
+    set_volume_rpc(SND_DEVICE_BT,      SND_METHOD_VOICE, vol, m7xsnddriverfd);
+    set_volume_rpc(SND_DEVICE_HEADSET, SND_METHOD_VOICE, vol, m7xsnddriverfd);
+    set_volume_rpc(SND_DEVICE_IN_S_SADC_OUT_HANDSET, SND_METHOD_VOICE, vol, m7xsnddriverfd);
+    set_volume_rpc(SND_DEVICE_IN_S_SADC_OUT_SPEAKER_PHONE, SND_METHOD_VOICE, vol, m7xsnddriverfd);
+    set_volume_rpc(SND_DEVICE_TTY_HEADSET, SND_METHOD_VOICE, 1, m7xsnddriverfd);
+    set_volume_rpc(SND_DEVICE_TTY_VCO, SND_METHOD_VOICE, 1, m7xsnddriverfd);
     // We return an error code here to let the audioflinger do in-software
     // volume on top of the maximum volume that we set through the SND API.
     // return error - software mixer will handle it
     return -1;
 }
 
-static status_t do_route_audio_rpc(uint32_t device, uint32_t rx_device,
-                                   uint32_t tx_device, cad_device_path_type path_type, 
+static status_t do_route_audio_rpc(uint32_t device,
                                    bool ear_mute, bool mic_mute, int m7xsnddriverfd)
 {
+    if (device == -1UL)
+        return NO_ERROR;
 
-    ALOGW("rpc_snd_set_device(%d, rx: %d, tx: %d, path: %d, %d, %d)\n", device, rx_device, tx_device, path_type, ear_mute, mic_mute);
+    ALOGW("rpc_snd_set_device(%d, %d, %d)\n", device, ear_mute, mic_mute);
 
     if (m7xsnddriverfd < 0) {
         ALOGE("Can not open snd device");
@@ -1633,12 +1679,9 @@ static status_t do_route_audio_rpc(uint32_t device, uint32_t rx_device,
      *                        # recording.
      *  )
      */
-    struct msm_cad_device_config args;
+    struct msm_snd_device_config args;
+    args.device = device;
     args.ear_mute = ear_mute ? SND_MUTE_MUTED : SND_MUTE_UNMUTED;
-    args.device.pathtype = path_type;
-    args.device.rx_device = rx_device;
-    args.device.tx_device = tx_device;
-
     if((device != SND_DEVICE_CURRENT) && (!mic_mute)
 #ifdef QCOM_FM_ENABLED
       &&(device != SND_DEVICE_FM_DIGITAL_STEREO_HEADSET)
@@ -1648,27 +1691,22 @@ static status_t do_route_audio_rpc(uint32_t device, uint32_t rx_device,
        ) {
         //Explicitly mute the mic to release DSP resources
         args.mic_mute = SND_MUTE_MUTED;
-        if (ioctl(m7xsnddriverfd, CAD_SET_DEVICE, &args) < 0) {
+        if (ioctl(m7xsnddriverfd, SND_SET_DEVICE, &args) < 0) {
             ALOGE("snd_set_device error.");
             return -EIO;
         }
     }
     args.mic_mute = mic_mute ? SND_MUTE_MUTED : SND_MUTE_UNMUTED;
-    if (ioctl(m7xsnddriverfd, CAD_SET_DEVICE, &args) < 0) {
+    if (ioctl(m7xsnddriverfd, SND_SET_DEVICE, &args) < 0) {
         ALOGE("snd_set_device error.");
         return -EIO;
     }
-
-    CAD_HW_DEVICE_ID_CURRENT_PATH = path_type;
-    CAD_HW_DEVICE_ID_CURRENT_RX = rx_device;
-    CAD_HW_DEVICE_ID_CURRENT_TX = tx_device;
 
     return NO_ERROR;
 }
 
 // always call with mutex held
-status_t AudioHardware::doAudioRouteOrMute(uint32_t device, uint32_t rx_device,
-                                           uint32_t tx_device, cad_device_path_type path_type)
+status_t AudioHardware::doAudioRouteOrMute(uint32_t device)
 {
     int rc;
     int nEarmute=true;
@@ -1696,8 +1734,8 @@ status_t AudioHardware::doAudioRouteOrMute(uint32_t device, uint32_t rx_device,
         ALOGW("VoipCall in MODE_IN_COMMUNICATION");
     }
 #endif
-    rc = do_route_audio_rpc(device, rx_device, tx_device, path_type,
-                              nEarmute, mMicMute, m7xsnddriverfd);
+    rc = do_route_audio_rpc(device,
+                              nEarmute , mMicMute, m7xsnddriverfd);
 #ifdef QCOM_FM_ENABLED
     if ((
         (device == SND_DEVICE_FM_DIGITAL_STEREO_HEADSET) ||
@@ -1739,13 +1777,13 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input, int outputDevice)
     uint32_t outputDevices;
     status_t ret = NO_ERROR;
     int new_snd_device = -1;
-    cad_device_path_type path_type = CAD_DEVICE_PATH_RX_TX;
-    uint32_t rx_device = -1, tx_device = -1;
 #ifdef QCOM_FM_ENABLED
     bool enableDgtlFmDriver = false;
 #endif
 
-    if (!outputDevices)
+    if (outputDevice)
+        outputDevices = outputDevice;
+    else
         outputDevices = mOutput->devices();
 
     //int (*msm72xx_enable_audpp)(int);
@@ -1763,13 +1801,9 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input, int outputDevice)
             if (inputDevice & AudioSystem::DEVICE_IN_BLUETOOTH_SCO_HEADSET) {
                 ALOGI("Routing audio to Bluetooth PCM\n");
                 new_snd_device = SND_DEVICE_BT;
-                rx_device = CAD_HW_DEVICE_ID_BT_CALL_RX;
-                tx_device = CAD_HW_DEVICE_ID_BT_CALL_TX;
             } else if (inputDevice & AudioSystem::DEVICE_IN_WIRED_HEADSET) {
                     ALOGI("Routing audio to Wired Headset\n");
                     new_snd_device = SND_DEVICE_HEADSET;
-                    rx_device = CAD_HW_DEVICE_ID_HEADSET_CALL_RX;
-                    tx_device = CAD_HW_DEVICE_ID_HEADSET_CALL_TX;
 #ifdef QCOM_FM_ENABLED
             } else if (inputDevice & AudioSystem::DEVICE_IN_FM_RX_A2DP) {
                     ALOGI("Routing audio from FM to Bluetooth A2DP\n");
@@ -1780,17 +1814,13 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input, int outputDevice)
                     enableDgtlFmDriver = true;
 #endif
             } else {
-                if (outputDevices & AudioSystem::DEVICE_OUT_EARPIECE) {
-                    ALOGI("Routing audio to Handset\n");
-                    new_snd_device = SND_DEVICE_HANDSET;
-                    rx_device = CAD_HW_DEVICE_ID_HANDSET_RX;
-                    tx_device = CAD_HW_DEVICE_ID_HANDSET_TX;
-                } else {
+                if (outputDevices & AudioSystem::DEVICE_OUT_SPEAKER) {
                     ALOGI("Routing audio to Speakerphone\n");
                     new_snd_device = SND_DEVICE_SPEAKER;
                     new_post_proc_feature_mask = (ADRC_ENABLE | EQ_ENABLE | RX_IIR_ENABLE | MBADRC_ENABLE);
-                    rx_device = CAD_HW_DEVICE_ID_SPEAKER_CALL_RX;
-                    tx_device = CAD_HW_DEVICE_ID_SPEAKER_CALL_TX;
+                } else {
+                    ALOGI("Routing audio to Handset\n");
+                    new_snd_device = SND_DEVICE_HANDSET;
                 }
             }
         }
@@ -1823,15 +1853,11 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input, int outputDevice)
             ALOGI("Routing audio to Wired Headset and Speaker\n");
             new_snd_device = SND_DEVICE_STEREO_HEADSET_AND_SPEAKER;
             new_post_proc_feature_mask = (ADRC_ENABLE | EQ_ENABLE | RX_IIR_ENABLE | MBADRC_ENABLE);
-            rx_device = CAD_HW_DEVICE_ID_HEADSET_AND_SPEAKER_RX;
-            tx_device = CAD_HW_DEVICE_ID_MP3_HEADSET_TX;
         } else if ((outputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADPHONE) &&
                    (outputDevices & AudioSystem::DEVICE_OUT_SPEAKER)) {
             ALOGI("Routing audio to No microphone Wired Headset and Speaker (%d,%x)\n", mMode, outputDevices);
             new_snd_device = SND_DEVICE_STEREO_HEADSET_AND_SPEAKER;
             new_post_proc_feature_mask = (ADRC_ENABLE | EQ_ENABLE | RX_IIR_ENABLE | MBADRC_ENABLE);
-            rx_device = CAD_HW_DEVICE_ID_HEADSET_AND_SPEAKER_RX;
-            tx_device = CAD_HW_DEVICE_ID_NONE;
 #endif
 #ifdef QCOM_FM_ENABLED
         } else if ((outputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADSET) &&
@@ -1841,8 +1867,6 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input, int outputDevice)
                 new_snd_device = SND_DEVICE_FM_DIGITAL_STEREO_HEADSET;
                 enableDgtlFmDriver = true;
                 new_post_proc_feature_mask = (ADRC_ENABLE | EQ_ENABLE | RX_IIR_ENABLE | MBADRC_ENABLE);
-                rx_device = CAD_HW_DEVICE_ID_FM_DIGITAL_STEREO_HEADSET;
-                tx_device = CAD_HW_DEVICE_ID_NONE;
             } else{
                 ALOGW("Enabling Anlg FM + codec device\n");
                 new_snd_device = SND_DEVICE_FM_ANALOG_STEREO_HEADSET_CODEC;
@@ -1854,8 +1878,6 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input, int outputDevice)
             new_snd_device = SND_DEVICE_FM_DIGITAL_SPEAKER_PHONE;
             new_post_proc_feature_mask = (ADRC_ENABLE | EQ_ENABLE | RX_IIR_ENABLE | MBADRC_ENABLE);
             enableDgtlFmDriver = true;
-            rx_device = CAD_HW_DEVICE_ID_FM_DIGITAL_SPEAKER_PHONE;
-            tx_device = CAD_HW_DEVICE_ID_NONE;
         } else if ( (outputDevices & AudioSystem::DEVICE_OUT_FM) && isFMAnalog()) {
             ALOGW("Enabling Anlg FM on wired headset\n");
             new_snd_device = SND_DEVICE_FM_ANALOG_STEREO_HEADSET;
@@ -1865,35 +1887,25 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input, int outputDevice)
                    (AudioSystem::DEVICE_OUT_BLUETOOTH_SCO | AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_HEADSET)) {
             ALOGI("Routing audio to Bluetooth PCM\n");
             new_snd_device = SND_DEVICE_BT;
-            rx_device = CAD_HW_DEVICE_ID_BT_CALL_RX;
-            tx_device = CAD_HW_DEVICE_ID_BT_CALL_TX;/*
         } else if (outputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT) {
             ALOGI("Routing audio to Bluetooth PCM\n");
-            new_snd_device = SND_DEVICE_CARKIT;*/
+            new_snd_device = SND_DEVICE_CARKIT;
         } else if (outputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADSET) {
             ALOGI("Routing audio to Wired Headset\n");
             new_snd_device = SND_DEVICE_HEADSET;
             new_post_proc_feature_mask = (ADRC_ENABLE | EQ_ENABLE | RX_IIR_ENABLE | MBADRC_ENABLE);
-            rx_device = CAD_HW_DEVICE_ID_MP3_HEADSET_RX;
-            tx_device = CAD_HW_DEVICE_ID_MP3_HEADSET_TX;
         } else if (outputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADPHONE) {
             ALOGI("Routing audio to Wired Headphone\n");
             new_snd_device = SND_DEVICE_HEADSET;
             new_post_proc_feature_mask = (ADRC_ENABLE | EQ_ENABLE | RX_IIR_ENABLE | MBADRC_ENABLE);
-            rx_device = CAD_HW_DEVICE_ID_MP3_HEADSET_RX;
-            tx_device = CAD_HW_DEVICE_ID_MP3_HEADSET_TX;
         } else if (outputDevices & AudioSystem::DEVICE_OUT_SPEAKER) {
             ALOGI("Routing audio to Speakerphone\n");
             new_snd_device = SND_DEVICE_SPEAKER;
             new_post_proc_feature_mask = (ADRC_ENABLE | EQ_ENABLE | RX_IIR_ENABLE | MBADRC_ENABLE);
-            rx_device = CAD_HW_DEVICE_ID_MP3_SPEAKER_RX;
-            tx_device = CAD_HW_DEVICE_ID_MP3_SPEAKER_TX;
         } else if (outputDevices & AudioSystem::DEVICE_OUT_EARPIECE) {
             ALOGI("Routing audio to Handset\n");
             new_snd_device = SND_DEVICE_HANDSET;
             new_post_proc_feature_mask = (ADRC_ENABLE | EQ_ENABLE | RX_IIR_ENABLE | MBADRC_ENABLE);
-            rx_device = CAD_HW_DEVICE_ID_HANDSET_RX;
-            tx_device = CAD_HW_DEVICE_ID_HANDSET_TX;
         }
     }
 
@@ -1918,7 +1930,7 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input, int outputDevice)
 #endif
 
     if (new_snd_device != -1 && new_snd_device != mCurSndDevice) {
-        ret = doAudioRouteOrMute(new_snd_device, rx_device, tx_device, path_type);
+        ret = doAudioRouteOrMute(new_snd_device);
 
         //disable post proc first for previous session
         if(hpcm_playback_in_progress
@@ -2069,9 +2081,14 @@ AudioHardware::AudioStreamInMSM72xx *AudioHardware::getActiveInput_l()
 #ifdef QCOM_VOIP_ENABLED
 status_t AudioHardware::setupDeviceforVoipCall(bool value)
 {
+    ALOGV("setupDeviceforVoipCall value %d",value);
+    if (mMode == AudioSystem::MODE_IN_CALL && value == false) {
+        ALOGE("mode already set for voice call, do not change to normal");
+        return NO_ERROR;
+    }
 
     int mode = (value ? AudioSystem::MODE_IN_COMMUNICATION : AudioSystem::MODE_NORMAL);
-    if (setMode(mode) != NO_ERROR) {
+    if (setMode(mode) == BAD_VALUE) {
         ALOGV("setMode fails");
         return UNKNOWN_ERROR;
     }
@@ -2096,7 +2113,7 @@ AudioHardware::AudioStreamInVoip::AudioStreamInVoip() :
     mHardware(0), mFd(-1), mState(AUDIO_INPUT_CLOSED), mRetryCount(0),
     mFormat(AUDIO_HW_IN_FORMAT), mChannels(AUDIO_HW_IN_CHANNELS),
     mSampleRate(AUDIO_HW_VOIP_SAMPLERATE_8K), mBufferSize(AUDIO_HW_VOIP_BUFFERSIZE_8K),
-    mAcoustics((AudioSystem::audio_in_acoustics)0), mDevices(0)
+    mAcoustics((AudioSystem::audio_in_acoustics)0), mDevices(0), mSetupDevice(false)
 {
 }
 
@@ -2107,7 +2124,7 @@ status_t AudioHardware::AudioStreamInVoip::set(
 {
     ALOGD("AudioStreamInVoip::set devices = %u format = %x pChannels = %u Rate = %u \n",
          devices, *pFormat, *pChannels, *pRate);
-    if ((pFormat == 0) || BAD_INDEX == hw->getMvsMode(*pFormat)) {
+    if ((pFormat == 0) || BAD_INDEX == hw->getMvsMode(*pFormat, *pRate)) {
         ALOGE("Audio Format (%x) not supported \n",*pFormat);
         return BAD_VALUE;
     }
@@ -2170,7 +2187,7 @@ status_t AudioHardware::AudioStreamInVoip::set(
            goto Error;
         }
 
-        mvs_config.mvs_mode = mHardware->getMvsMode(*pFormat);
+        mvs_config.mvs_mode = mHardware->getMvsMode(*pFormat, *pRate);
         status = mHardware->getMvsRateType(mvs_config.mvs_mode ,&mvs_config.rate_type);
         ALOGD("set mvs config mode %d rate_type %d", mvs_config.mvs_mode, mvs_config.rate_type);
         if (status < 0) {
@@ -2211,9 +2228,6 @@ status_t AudioHardware::AudioStreamInVoip::set(
     mState = AUDIO_INPUT_OPENED;
 
     mHardware->mVoipInActive = true;
-
-    if (mHardware->mVoipOutActive)
-        mHardware->setupDeviceforVoipCall(true);
 
     if (!acoustic)
         return NO_ERROR;
@@ -2268,7 +2282,11 @@ ssize_t AudioHardware::AudioStreamInVoip::read( void* buffer, ssize_t bytes)
       ALOGE("read:: read size requested is less than min input buffer size");
       return 0;
     }
-
+    
+    if (!mSetupDevice) {
+        mSetupDevice = true;
+        mHardware->setupDeviceforVoipCall(true);
+    }
     struct msm_audio_mvs_frame audio_mvs_frame;
     memset(&audio_mvs_frame, 0, sizeof(audio_mvs_frame));
     if(mFormat == AudioSystem::PCM_16_BIT) {
@@ -2320,6 +2338,7 @@ status_t AudioHardware::AudioStreamInVoip::standby()
             ALOGD("MVS stop returned %d %d %d\n", ret, __LINE__, mHardware->mVoipFd);
             ::close(mFd);
             mFd = mHardware->mVoipFd = -1;
+            mSetupDevice = false;
             mHardware->setupDeviceforVoipCall(false);
             ALOGD("MVS driver closed %d mFd %d", __LINE__, mHardware->mVoipFd);
         }
@@ -2618,7 +2637,7 @@ status_t AudioHardware::AudioStreamOutMSM72xx::setParameters(const String8& keyV
     if (param.getInt(key, device) == NO_ERROR) {
         mDevices = device;
         ALOGV("set output routing %x", mDevices);
-        status = mHardware->doRouting(NULL);
+        status = mHardware->doRouting(NULL, device);
         param.remove(key);
     }
 
@@ -2666,7 +2685,7 @@ status_t AudioHardware::AudioStreamOutDirect::set(
     ALOGD("AudioStreamOutDirect::set  lFormat = %x lChannels= %u lRate = %u\n",
         lFormat, lChannels, lRate );
 
-    if ((pFormat == 0) || BAD_INDEX == hw->getMvsMode(*pFormat)) {
+    if ((pFormat == 0) || BAD_INDEX == hw->getMvsMode(*pFormat, lRate)) {
         ALOGE("Audio Format (%x) not supported \n",*pFormat);
         return BAD_VALUE;
     }
@@ -2680,11 +2699,9 @@ status_t AudioHardware::AudioStreamOutDirect::set(
 
         // check values
         if ((lFormat != format()) ||
-            (lChannels != channels()) ||
-            (lRate != sampleRate())) {
+            (lChannels != channels())) {
             if (pFormat) *pFormat = format();
             if (pChannels) *pChannels = channels();
-            if (pRate) *pRate = sampleRate();
             ALOGE("  AudioStreamOutDirect::set return bad values\n");
             return BAD_VALUE;
         }
@@ -2713,9 +2730,6 @@ status_t AudioHardware::AudioStreamOutDirect::set(
 
     mDevices = devices;
     mHardware->mVoipOutActive = true;
-
-    if (mHardware->mVoipInActive)
-        mHardware->setupDeviceforVoipCall(true);
 
     return NO_ERROR;
 }
@@ -2762,7 +2776,7 @@ ssize_t AudioHardware::AudioStreamOutDirect::write(const void* buffer, size_t by
                goto Error;
             }
 
-            mvs_config.mvs_mode = mHardware->getMvsMode(mFormat);
+            mvs_config.mvs_mode = mHardware->getMvsMode(mFormat, mSampleRate);
             status = mHardware->getMvsRateType(mvs_config.mvs_mode ,&mvs_config.rate_type);
             ALOGD("set mvs config mode %d rate_type %d", mvs_config.mvs_mode, mvs_config.rate_type);
             if (status < 0) {
@@ -3425,31 +3439,21 @@ ssize_t AudioHardware::AudioSessionOutLPA::write(const void* buffer, size_t byte
     ALOGV("write Empty Queue size() = %d, Filled Queue size() = %d ",
          mEmptyQueue.size(),mFilledQueue.size());
 
-    // 1.) Wait till a empty buffer is available in the Empty buffer queue
-    mEmptyQueueMutex.lock();
-    if (mEmptyQueue.empty()) {
-        ALOGV("Write: waiting on mWriteCv");
-        mLock.unlock();
-        mWriteCv.wait(mEmptyQueueMutex);
-        mLock.lock();
-        if (mSkipWrite) {
-            ALOGV("Write: Flushing the previous write buffer");
-            mSkipWrite = false;
-            if (bytes < LPA_BUFFER_SIZE) {
-                bytes = 0;
-            } else {
-                mEmptyQueueMutex.unlock();
-                return 0;
-            }
-        }
-        ALOGV("Write: received a signal to wake up");
+    if (mSkipWrite) {
+        mSkipWrite = false;
+        if (bytes < LPA_BUFFER_SIZE)
+            bytes = 0;
+        else
+            return 0;
     }
+
     if (mSkipWrite)
         mSkipWrite = false;
 
     //2.) Dequeue the buffer from empty buffer queue. Copy the data to be
     //    written into the buffer. Then Enqueue the buffer to the filled
     //    buffer queue
+    mEmptyQueueMutex.lock();
     List<BuffersAllocated>::iterator it = mEmptyQueue.begin();
     BuffersAllocated buf = *it;
     mEmptyQueue.erase(it);
@@ -3511,9 +3515,11 @@ ssize_t AudioHardware::AudioSessionOutLPA::write(const void* buffer, size_t byte
 
     if (bytes < LPA_BUFFER_SIZE) {
         ALOGV("Last buffer case");
+        mLock.unlock();
         if (fsync(afd) != 0) {
             ALOGE("fsync failed.");
         }
+        mLock.lock();
         mReachedEOS = true;
     }
 
@@ -3937,6 +3943,7 @@ status_t AudioHardware::AudioSessionOutLPA::drain()
 
 status_t AudioHardware::AudioSessionOutLPA::flush()
 {
+	Mutex::Autolock autoLock(mLock);
     ALOGV("LPA playback flush ");
     int err;
 
@@ -4029,6 +4036,52 @@ status_t AudioHardware::AudioSessionOutLPA::getRenderPosition(uint32_t *dspFrame
 {
     //TODO: enable when supported by driver
     return INVALID_OPERATION;
+}
+
+
+status_t AudioHardware::AudioSessionOutLPA::getBufferInfo(buf_info **buf) {
+
+    buf_info *tempbuf = (buf_info *)malloc(sizeof(buf_info) + mInputBufferCount*sizeof(int *));
+    ALOGV("Get buffer info");
+    tempbuf->bufsize = LPA_BUFFER_SIZE;
+    tempbuf->nBufs = mInputBufferCount;
+    tempbuf->buffers = (int **)((char*)tempbuf + sizeof(buf_info));
+    List<BuffersAllocated>::iterator it = mEmptyQueue.begin();
+    for (int i = 0; i < mInputBufferCount; i++) {
+        tempbuf->buffers[i] = (int *)it->memBuf;
+        it++;
+    }
+    *buf = tempbuf;
+    return NO_ERROR;
+}
+
+status_t AudioHardware::AudioSessionOutLPA::isBufferAvailable(int *isAvail) {
+
+    Mutex::Autolock autoLock(mLock);
+    ALOGV("isBufferAvailable Empty Queue size() = %d, Filled Queue size() = %d ",
+          mEmptyQueue.size(),mFilledQueue.size());
+    *isAvail = false;
+    // 1.) Wait till a empty buffer is available in the Empty buffer queue
+    mEmptyQueueMutex.lock();
+    if (mEmptyQueue.empty()) {
+        ALOGV("Write: waiting on mWriteCv");
+        mLock.unlock();
+        mWriteCv.wait(mEmptyQueueMutex);
+        mEmptyQueueMutex.unlock();
+        mLock.lock();
+        if (mSkipWrite) {
+            ALOGV("Write: Flushing the previous write buffer");
+            mSkipWrite = false;
+            return NO_ERROR;
+        }
+        ALOGV("Write: received a signal to wake up");
+         } else {
+        ALOGV("Buffer available in empty queue");
+        mEmptyQueueMutex.unlock();
+    }
+
+    *isAvail = true;
+    return NO_ERROR;
 }
 
 // End AudioSessionOutLPA

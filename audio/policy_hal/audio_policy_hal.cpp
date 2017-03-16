@@ -1,9 +1,6 @@
 /*
  * Copyright (C) 2011 The Android Open Source Project
- * Copyright (c) 2012, The Linux Foundation. All rights reserved.
- * Copyright (c) 2012-2013, The CyanogenMod Project
- * Not a Contribution, Apache license notifications and license are retained
- * for attribution purposes only.
+ * Copyright (c) 2012, Code Aurora Forum. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +15,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "audio_policy.msm7x30"
+#define LOG_TAG "audio_policy.msm7627a"
 //#define LOG_NDEBUG 0
 
 #include <stdint.h>
@@ -34,7 +31,6 @@
 #include "AudioPolicyCompatClient.h"
 
 namespace android_audio_legacy {
-//using android_audio_legacy::AudioSystem;
 
 extern "C" {
 
@@ -95,11 +91,7 @@ static void ap_set_phone_state(struct audio_policy *pol, audio_mode_t state)
     qap->apm->setPhoneState(state);
 }
 
-static void ap_set_ringer_mode(struct audio_policy *pol, uint32_t mode,
-                               uint32_t mask)
-{
-    // deprecated, never called
-}
+    /* indicate a change in ringer mode */
     /* force using a specific device category for the specified usage */
 static void ap_set_force_use(struct audio_policy *pol,
                           audio_policy_force_use_t usage,
@@ -186,7 +178,7 @@ static audio_io_handle_t ap_get_output(struct audio_policy *pol,
 
     ALOGV("%s: tid %d", __func__, gettid());
     return qap->apm->getOutput((AudioSystem::stream_type)stream,
-                               sampling_rate,(int) format, channelMask,
+                               sampling_rate,(int)  format, channelMask,
                                (AudioSystem::output_flags)flags);
 }
 
@@ -350,6 +342,7 @@ static bool ap_is_source_active(const struct audio_policy *pol, audio_source_t s
     const struct qcom_audio_policy *qap = to_cqap(pol);
     return qap->apm->isSourceActive(source);
 }
+
 static int ap_dump(const struct audio_policy *pol, int fd)
 {
     const struct qcom_audio_policy *qap = to_cqap(pol);
