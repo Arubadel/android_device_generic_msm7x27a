@@ -13,6 +13,7 @@ LOCAL_SRC_FILES := \
 ifeq ($(strip $(TARGET_HAS_QACT)),true)
 LOCAL_SRC_FILES += \
     AudioHardware_cad.cpp
+LOCAL_CFLAGS += -DWITH_QACT
 else
 LOCAL_SRC_FILES += \
     AudioHardware.cpp

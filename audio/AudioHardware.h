@@ -243,13 +243,21 @@ protected:
 
 private:
 
+#ifdef WITH_QACT
+    status_t    doAudioRouteOrMute(uint32_t device, uint32_t rx_device, uint32_t tx_device, cad_device_path_type path_type);
+#else
     status_t    doAudioRouteOrMute(uint32_t device);
+#endif
     status_t    setMicMute_nosync(bool state);
     status_t    checkMicMute();
     status_t    dumpInternals(int fd, const Vector<String16>& args);
     uint32_t    getInputSampleRate(uint32_t sampleRate);
     bool        checkOutputStandby();
+#ifdef WITH_QACT
+    status_t    doRouting(AudioStreamInMSM72xx *input, uint32_t outputDevice = 0);
+#else
     status_t    doRouting(AudioStreamInMSM72xx *input, int outputDevice = 0);
+#endif
 #ifdef QCOM_FM_ENABLED
     status_t    enableFM();
     status_t    disableFM();
@@ -612,7 +620,10 @@ private:
             uint32_t mVoipBitRate;
             msm_snd_endpoint *mSndEndpoints;
             int mNumSndEndpoints;
-
+#ifdef WITH_QACT
+            msm_cad_endpoint *mCadEndpoints;
+            int mNumCadEndpoints;
+#endif
             int mCurSndDevice;
             int m7xsnddriverfd;
             bool        mDualMicEnabled;
