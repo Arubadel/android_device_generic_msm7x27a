@@ -196,3 +196,6 @@ service get_macaddrs /system/bin/get_macaddrs
 
 on property:init.svc.ril-daemon=running
     start get_macaddrs
+
+on property:sys.boot_completed=1
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor        ondemand
