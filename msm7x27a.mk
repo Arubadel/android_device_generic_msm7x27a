@@ -88,12 +88,6 @@ PRODUCT_COPY_FILES += \
     device/samsung/msm7x27a-common/rootdir/lpm.rc:root/lpm.rc \
     device/samsung/msm7x27a-common/rootdir/fstab.qcom:root/fstab.qcom
 
-## Recovery
-PRODUCT_COPY_FILES += \
-    device/samsung/msm7x27a-common/recovery/sbin/rmt_storage_recovery:recovery/root/sbin/rmt_storage_recovery \
-    device/samsung/msm7x27a-common/recovery/postrecoveryboot.sh:recovery/root/sbin/postrecoveryboot.sh \
-    device/samsung/msm7x27a-common/recovery/postrecoveryboot.sh:recovery/system/bin/postrecoveryboot.sh
-
 ## FM
 PRODUCT_COPY_FILES += \
     device/samsung/msm7x27a-common/prebuilt/etc/init.qcom.fm.sh:/system/etc/init.qcom.fm.sh
