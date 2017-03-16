@@ -4,22 +4,27 @@ on early-init
     mount debugfs debugfs /sys/kernel/debug
 
 on init
-    export EXTERNAL_STORAGE /storage/sdcard0
+    #export EXTERNAL_STORAGE /storage/sdcard0
     export SECONDARY_STORAGE /storage/sdcard1
 
-    ## Setup storage
-    mkdir /storage 0775 system sdcard_r
-    mkdir /storage/sdcard0 0775 system system
-    mkdir /storage/sdcard1 0775 system system
-    mkdir /storage/usbdisk0 0775 system system
+    # See storage config details at http://source.android.com/tech/storage/
+    mkdir /mnt/shell/emulated 0700 shell shell
+    mkdir /storage/emulated 0555 root root
 
-    ## Backwards compability
-    symlink /storage/sdcard0 /mnt/sdcard
-    symlink /storage/sdcard0 /sdcard
-    symlink /storage/sdcard1 /external_sd
+    export EXTERNAL_STORAGE /storage/emulated/legacy
+    export EMULATED_STORAGE_SOURCE /mnt/shell/emulated
+    export EMULATED_STORAGE_TARGET /storage/emulated
+
+    # Support legacy paths
+    symlink /data/media /storage/emulated/legacy
+    symlink /storage/emulated/legacy /sdcard
+    symlink /storage/emulated/legacy /mnt/sdcard
+    symlink /storage/emulated/legacy /storage/sdcard0
+    symlink /mnt/shell/emulated/0 /storage/emulated/legacy
+
+    export SECONDARY_STORAGE /storage/sdcard1
+    mkdir /storage/sdcard1 0000 system system
     symlink /storage/sdcard1 /mnt/external_sd
-    symlink /storage/usbdisk0 /mnt/usbdisk
-    symlink /storage/usbdisk0 /usbdisk
 
     # create directory for ril data
     mkdir /data/misc/radio 0775 radio radio
