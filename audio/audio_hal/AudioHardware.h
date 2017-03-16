@@ -244,13 +244,13 @@ protected:
 
 private:
 
-    status_t    doAudioRouteOrMute(uint32_t device);
+    status_t    doAudioRouteOrMute(uint32_t device, uint32_t rx_device, uint32_t tx_device, cad_device_path_type path_type);
     status_t    setMicMute_nosync(bool state);
     status_t    checkMicMute();
     status_t    dumpInternals(int fd, const Vector<String16>& args);
     uint32_t    getInputSampleRate(uint32_t sampleRate);
     bool        checkOutputStandby();
-    status_t    doRouting(AudioStreamInMSM72xx *input, int outputDevice = 0);
+    status_t    doRouting(AudioStreamInMSM72xx *input, uint32_t outputDevice = 0);
 #ifdef QCOM_FM_ENABLED
     status_t    enableFM();
     status_t    disableFM();
