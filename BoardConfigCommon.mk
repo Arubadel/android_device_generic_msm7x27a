@@ -58,6 +58,15 @@ COMMON_GLOBAL_CFLAGS += -DQCOM_FM_ENABLED
 ENABLE_WEBGL := true
 TARGET_FORCE_CPU_UPLOAD := true
 
+# Enable dex-preoptimization to speed up first boot sequence
+ifeq ($(HOST_OS),linux)
+  ifeq ($(TARGET_BUILD_VARIANT),userdebug)
+    ifeq ($(WITH_DEXPREOPT),)
+      WITH_DEXPREOPT := true
+    endif
+  endif
+endif
+
 ## ION
 TARGET_USES_ION := true
 
@@ -66,6 +75,7 @@ USE_OPENGL_RENDERER := true
 TARGET_USES_QCOM_BSP := true
 TARGET_ENABLE_QC_AV_ENHANCEMENTS := true
 TARGET_QCOM_DISPLAY_VARIANT := legacy
+TARGET_PROVIDES_LIBLIGHT := true
 TARGET_QCOM_MEDIA_VARIANT := legacy
 TARGET_QCOM_AUDIO_VARIANT := legacy
 TARGET_HAS_QACT := true
@@ -115,7 +125,7 @@ TARGET_NO_INITLOGO := true
 ## Charging mode
 BOARD_LPM_BOOT_ARGUMENT_NAME := androidboot.boot_pause
 BOARD_LPM_BOOT_ARGUMENT_VALUE := batt
-BOARD_CHARGER_RES := device/samsung/msm7x27a-common/res/charger
+#BOARD_CHARGER_RES := device/samsung/msm7x27a-common/res/charger
 
 ## Use device specific modules
 TARGET_PROVIDES_LIBLIGHTS := true
