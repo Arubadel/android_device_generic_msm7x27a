@@ -101,6 +101,11 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/samsung/msm7x27a-common/prebuilt/etc/vold.fstab:system/etc/vold.fstab
 
+## Bluetooth config
+PRODUCT_COPY_FILES += \
+    device/samsung/msm7x27a-common/prebuilt/etc/init.qcom.bt.sh:system/etc/init.qcom.bt.sh \
+    device/samsung/msm7x27a-common/prebuilt/etc/PSConfig_7820.psr:system/etc/PSConfig_7820.psr
+
 ## Audio
 PRODUCT_COPY_FILES += \
     device/samsung/msm7x27a-common/prebuilt/etc/audio_policy.conf:system/etc/audio_policy.conf \
