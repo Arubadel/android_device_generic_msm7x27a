@@ -195,11 +195,15 @@ service iprenew_bnep0 /system/bin/dhcpcd -n
     oneshot
 
 service ril-daemon1 /system/bin/rild -c 1
-     class main
-     socket rild1 stream 660 root radio
-     socket rild-debug1 stream 660 radio system
-     user root
-     group radio cache inet misc audio sdcard_r sdcard_rw qcom_diag log qcom_oncrpc
+    class main
+    socket rild1 stream 660 root radio
+    socket rild-debug1 stream 660 radio system
+    user root
+    group radio cache inet misc audio sdcard_rw qcom_oncrpc qcom_diag log
+    disabled
+
+on property:persist.radio.multisim.config=dsds
+    start ril-daemon1
 
 service secril-daemon /system/bin/sec-ril
 class main

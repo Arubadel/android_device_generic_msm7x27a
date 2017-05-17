@@ -15,13 +15,9 @@
 # BoardConfig.mk
 #
 
-## Kernel, bootloader etc.
+##  bootloader etc.
 TARGET_NO_BOOTLOADER := true
 TARGET_NO_RADIOIMAGE := true
-BOARD_KERNEL_BASE := 0x00200000
-BOARD_KERNEL_PAGESIZE := 4096
-TARGET_KERNEL_SOURCE := kernel/samsung/msm7x27a
-BOARD_MKBOOTIMG_ARGS := --ramdisk_offset 0x01300000
 
 ## Platform
 TARGET_ARCH := arm
@@ -31,11 +27,12 @@ TARGET_BOARD_PLATFORM := msm7x27a
 TARGET_BOARD_PLATFORM_GPU := qcom-adreno200
 TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
-TARGET_ARCH_VARIANT_CPU := cortex-a5
+TARGET_ARCH_VARIANT_CPU := cortex-a9
+TARGET_CPU_VARIANT := cortex-a9
 TARGET_SPECIFIC_HEADER_PATH := device/samsung/msm7x27a-common/include
 
-TARGET_GLOBAL_CFLAGS += -mtune=cortex-a5 -mfpu=neon -mfloat-abi=softfp
-TARGET_GLOBAL_CPPFLAGS += -mtune=cortex-a5 -mfpu=neon -mfloat-abi=softfp
+TARGET_GLOBAL_CFLAGS += -mtune=cortex-a9 -mfpu=neon -mfloat-abi=softfp
+TARGET_GLOBAL_CPPFLAGS += -mtune=cortex-a9 -mfpu=neon -mfloat-abi=softfp
 
 ## Bionic
 TARGET_CORTEX_CACHE_LINE_32 := true
@@ -49,10 +46,18 @@ BOARD_NEEDS_MEMORYHEAPPMEM := true
 TARGET_DISABLE_ARM_PIE := true
 COMMON_GLOBAL_CFLAGS += -DBINDER_COMPAT
 COMMON_GLOBAL_CFLAGS += -DSAMSUNG_CAMERA_LEGACY
+BOARD_USES_PROPRIETARY_OMX := samsung
+
+## kernel
+
+BOARD_KERNEL_BASE := 0x00200000
+BOARD_KERNEL_PAGESIZE := 4096
+TARGET_KERNEL_SOURCE := kernel/samsung/msm7x27a
+BOARD_MKBOOTIMG_ARGS := --ramdisk_offset 0x01300000
 
 ## FM Radio
-BOARD_HAVE_QCOM_FM := true
-COMMON_GLOBAL_CFLAGS += -DQCOM_FM_ENABLED
+#BOARD_HAVE_QCOM_FM := true
+#COMMON_GLOBAL_CFLAGS += -DQCOM_FM_ENABLED
 
 ## Webkit
 ENABLE_WEBGL := true
@@ -89,7 +94,7 @@ TARGET_PROVIDES_LIBLIGHT := true
 USE_OPENGL_RENDERER := true
 TARGET_PROVIDES_LIBLIGHTS := true
 TARGET_GRALLOC_USES_ASHMEM := true
-TARGET_USES_C2D_COMPOSITION := true
+#TARGET_USES_C2D_COMPOSITION := true
 BOARD_EGL_NEEDS_LEGACY_FB := true
 
 ## GPS
@@ -100,6 +105,7 @@ BOARD_VENDOR_QCOM_GPS_LOC_API_AMSS_VERSION := 50000
 
 ## Bluetooth
 BOARD_HAVE_BLUETOOTH := true
+BOARD_BLUETOOTH_DOES_NOT_USE_RFKILL := true
 
 ## Wi-Fi
 BOARD_WLAN_DEVICE := ath6kl
