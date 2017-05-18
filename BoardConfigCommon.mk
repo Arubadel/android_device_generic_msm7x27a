@@ -15,7 +15,7 @@
 # BoardConfig.mk
 #
 
-##  bootloader etc.
+##  bootloader
 TARGET_NO_BOOTLOADER := true
 TARGET_NO_RADIOIMAGE := true
 
@@ -78,8 +78,12 @@ TARGET_USES_ION := true
 ## media
 TARGET_ENABLE_QC_AV_ENHANCEMENTS := true
 TARGET_QCOM_MEDIA_VARIANT := legacy
-TARGET_QCOM_AUDIO_VARIANT := caf
 TARGET_HAS_QACT := true
+
+## Audio
+TARGET_PROVIDES_LIBAUDIO := true
+BOARD_USES_LEGACY_ALSA_AUDIO := true
+TARGET_QCOM_AUDIO_VARIANT := caf
 
 # Qcom Hardware
 COMMON_GLOBAL_CFLAGS += -DQCOM_HARDWARE -DQCOM_BSP
@@ -87,7 +91,7 @@ BOARD_USES_QCOM_HARDWARE := true
 TARGET_USES_QCOM_BSP := true
 
 # Qcom Display
-TARGET_QCOM_DISPLAY_VARIANT := legacy
+TARGET_QCOM_DISPLAY_VARIANT := caf
 BOARD_EGL_CFG := device/samsung/msm7x27a-common/prebuilt/lib/egl/egl.cfg
 BOARD_ADRENO_DECIDE_TEXTURE_TARGET := true
 TARGET_PROVIDES_LIBLIGHT := true
@@ -136,9 +140,6 @@ TARGET_NO_INITLOGO := true
 BOARD_LPM_BOOT_ARGUMENT_NAME := androidboot.boot_pause
 BOARD_LPM_BOOT_ARGUMENT_VALUE := batt
 #BOARD_CHARGER_RES := device/samsung/msm7x27a-common/res/charger
-
-## Use device specific modules
-TARGET_PROVIDES_LIBAUDIO := true
 
 ## Recovery
 TARGET_RECOVERY_FSTAB := device/samsung/msm7x27a-common/rootdir/recovery.fstab
