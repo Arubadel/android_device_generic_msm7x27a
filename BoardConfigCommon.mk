@@ -78,6 +78,7 @@ TARGET_USES_ION := true
 ## media
 TARGET_ENABLE_QC_AV_ENHANCEMENTS := true
 TARGET_QCOM_MEDIA_VARIANT := legacy
+COMMON_GLOBAL_CFLAGS += -DMAX_RES_720P
 TARGET_HAS_QACT := true
 
 ## Audio
@@ -100,6 +101,7 @@ TARGET_PROVIDES_LIBLIGHTS := true
 TARGET_GRALLOC_USES_ASHMEM := true
 #TARGET_USES_C2D_COMPOSITION := true
 BOARD_EGL_NEEDS_LEGACY_FB := true
+TARGET_HAS_OLD_QCOM_ION := true
 
 ## GPS
 BOARD_USES_QCOM_LIBRPC := true
@@ -142,7 +144,7 @@ BOARD_LPM_BOOT_ARGUMENT_VALUE := batt
 #BOARD_CHARGER_RES := device/samsung/msm7x27a-common/res/charger
 
 ## Recovery
-TARGET_RECOVERY_FSTAB := device/samsung/msm7x27a-common/rootdir/recovery.fstab
+TARGET_RECOVERY_FSTAB := device/samsung/msm7x27a-common/rootdir/fstab.qcom
 TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
 TARGET_USERIMAGES_USE_EXT4 := true
 BOARD_HAS_SDCARD_INTERNAL := true
