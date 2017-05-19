@@ -87,7 +87,7 @@ TARGET_USES_QCOM_BSP := true
 
 # Qcom Display
 TARGET_QCOM_DISPLAY_VARIANT := caf
-BOARD_EGL_CFG := device/samsung/msm7x27a-common/prebuilt/lib/egl/egl.cfg
+BOARD_EGL_CFG := device/samsung/msm7x27a-common/configs/lib/egl/egl.cfg
 BOARD_ADRENO_DECIDE_TEXTURE_TARGET := true
 TARGET_PROVIDES_LIBLIGHT := true
 USE_OPENGL_RENDERER := true

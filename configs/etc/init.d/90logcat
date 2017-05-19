@@ -1,0 +1,2 @@
+#!/system/bin/sh
+logcat > /data/logcat.txt

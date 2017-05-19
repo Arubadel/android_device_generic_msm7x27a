@@ -77,8 +77,8 @@ PRODUCT_COPY_FILES += \
 
 ## Media
 PRODUCT_COPY_FILES += \
-    device/samsung/msm7x27a-common/prebuilt/etc/media_profiles.xml:system/etc/media_profiles.xml \
-    device/samsung/msm7x27a-common/prebuilt/etc/media_codecs.xml:system/etc/media_codecs.xml
+    device/samsung/msm7x27a-common/configs/etc/media_profiles.xml:system/etc/media_profiles.xml \
+    device/samsung/msm7x27a-common/configs/etc/media_codecs.xml:system/etc/media_codecs.xml
 
 ## Rootdir
 PRODUCT_COPY_FILES += \
@@ -90,33 +90,37 @@ PRODUCT_COPY_FILES += \
 
 ## FM
 PRODUCT_COPY_FILES += \
-    device/samsung/msm7x27a-common/prebuilt/etc/init.qcom.fm.sh:/system/etc/init.qcom.fm.sh
+    device/samsung/msm7x27a-common/configs/etc/init.qcom.fm.sh:/system/etc/init.qcom.fm.sh
 
 ## Network
 PRODUCT_COPY_FILES += \
-    device/samsung/msm7x27a-common/prebuilt/etc/wifi/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
-    device/samsung/msm7x27a-common/prebuilt/bin/get_macaddrs:system/bin/get_macaddrs
+    device/samsung/msm7x27a-common/configs/etc/wifi/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
+    device/samsung/msm7x27a-common/configs/bin/get_macaddrs:system/bin/get_macaddrs
 
 ## Vold config
 PRODUCT_COPY_FILES += \
-    device/samsung/msm7x27a-common/prebuilt/etc/vold.fstab:system/etc/vold.fstab
+    device/samsung/msm7x27a-common/configs/etc/vold.fstab:system/etc/vold.fstab
 
 ## Bluetooth config
 PRODUCT_COPY_FILES += \
-    device/samsung/msm7x27a-common/prebuilt/etc/init.qcom.bt.sh:system/etc/init.qcom.bt.sh \
-    device/samsung/msm7x27a-common/prebuilt/etc/PSConfig_7820.psr:system/etc/PSConfig_7820.psr
+    device/samsung/msm7x27a-common/configs/etc/init.qcom.bt.sh:system/etc/init.qcom.bt.sh \
+    device/samsung/msm7x27a-common/configs/etc/PSConfig_7820.psr:system/etc/PSConfig_7820.psr
 
 ## Audio
 PRODUCT_COPY_FILES += \
-    device/samsung/msm7x27a-common/prebuilt/etc/audio_policy.conf:system/etc/audio_policy.conf \
-    device/samsung/msm7x27a-common/prebuilt/etc/AutoVolumeControl.txt:system/etc/AutoVolumeControl.txt \
-    device/samsung/msm7x27a-common/prebuilt/etc/AudioFilter.csv:system/etc/AudioFilter.csv
+    device/samsung/msm7x27a-common/configs/etc/audio_policy.conf:system/etc/audio_policy.conf \
+    device/samsung/msm7x27a-common/configs/etc/AutoVolumeControl.txt:system/etc/AutoVolumeControl.txt \
+    device/samsung/msm7x27a-common/configs/etc/AudioFilter.csv:system/etc/AudioFilter.csv
 
 ## Sensor calibration files
 PRODUCT_COPY_FILES += \
-    device/samsung/msm7x27a-common/prebuilt/etc/calib.dat:system/etc/calib.dat \
-    device/samsung/msm7x27a-common/prebuilt/etc/param.dat:system/etc/param.dat \
-    device/samsung/msm7x27a-common/prebuilt/etc/sensors.dat:system/etc/sensors.dat
+    device/samsung/msm7x27a-common/configs/etc/calib.dat:system/etc/calib.dat \
+    device/samsung/msm7x27a-common/configs/etc/param.dat:system/etc/param.dat \
+    device/samsung/msm7x27a-common/configs/etc/sensors.dat:system/etc/sensors.dat
+## init.d
+PRODUCT_COPY_FILES += \
+    device/samsung/msm7x27a-common/configs/etc/init.d/70rild:system/etc/init.d/70rild \
+    device/samsung/msm7x27a-common/configs/etc/init.d/90logcat:system/etc/init.d/90logcat \
 
 #Rild
 PRODUCT_PACKAGES += \

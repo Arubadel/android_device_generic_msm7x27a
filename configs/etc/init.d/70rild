@@ -1,0 +1,11 @@
+#!/system/bin/sh
+L="log -p i -t RILD"
+if [ -f /system/bin/rild2 ]; then
+mount -o remount,rw /system
+$L "/system rild starting..."
+rm /system/bin/rild
+mv /system/bin/rild2 /system/bin/rild
+$L "/system relabel complete"
+mount -o remount,ro /system
+reboot
+fi
