@@ -24,6 +24,13 @@ on fs
     mount_all /fstab.qcom
     setprop ro.crypto.fuse_sdcard true
 
+service griffon /system/bin/gps-start.sh
+   class main
+   socket gpsd39 dgram 0660 gps system inet
+   socket gpsd16 dgram 0660 gps system inet
+   user gps
+   group gps system qcom_diag diag log inet
+
 on post-fs-data
     # we will remap this as /storage/sdcard0 with the sdcard fuse tool
     mkdir /data/media 0770 media_rw media_rw
@@ -37,6 +44,14 @@ on post-fs-data
     # Create directories for wiper services
     mkdir /data/wpstiles/ 0755 shell
     mkdir /data/wiper 0755 gps qcom_oncrpc
+
+    #Create directories for gpsone_daemon services
+    mkdir /data/misc/gpsone_d 0770 system gps
+
+    #Create directories for Location services
+    mkdir /data/misc/location 0770 gps gps
+    mkdir /data/misc/location/mq 0770 gps gps
+    mkdir /data/misc/location/xtwifi 0770 gps gps
 
     # provide the access to hostapd.conf only to root and group
     chmod 0660 /data/hostapd/hostapd.conf
@@ -70,6 +85,9 @@ on boot
     # lights and torch
     chown system system /sys/class/sec/sec_touchkey/brightness
     chmod 0666 /sys/class/camera/rear/rear_flash
+
+    # TelephonyManager.java requires this
+    chmod 0644 /proc/cmdline
 
 on charger
     # enable powersave governor when charging
@@ -189,15 +207,6 @@ service ril-daemon1 /system/bin/rild -c 1
     socket rild-debug1 stream 660 radio system
     user root
     group radio cache inet misc audio sdcard_rw qcom_oncrpc qcom_diag log
-    disabled
-
-on property:persist.radio.multisim.config=dsds
-    start ril-daemon1
-
-service secril-daemon /system/bin/sec-ril
-class main
-user root
-group radio cache inet misc audio sdcard_rw diag log
 
 # SISO-ANDR-PERF :: START Changing governor to interactive and scheduler to cfq after boot complete
 on property:sys.boot_completed=1
