@@ -1623,7 +1623,7 @@ status_t AudioHardware::setFmVolume(float v)
 status_t AudioHardware::setMasterVolume(float v)
 {
     Mutex::Autolock lock(mLock);
-    int vol = ceil(v * 7.0);
+    int vol = ceil(v * 50.0);
     ALOGI("Set master volume to %d.\n", vol);
     set_volume_rpc(CAD_HW_DEVICE_ID_HANDSET_RX, CAD_HW_DEVICE_ID_HANDSET_TX, SND_METHOD_VOICE, vol, m7xsnddriverfd);
     set_volume_rpc(CAD_HW_DEVICE_ID_SPEAKER_CALL_RX, CAD_HW_DEVICE_ID_SPEAKER_CALL_TX, SND_METHOD_VOICE, vol, m7xsnddriverfd);
