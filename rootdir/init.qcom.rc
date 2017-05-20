@@ -97,6 +97,12 @@ service playlpm /system/bin/playlpm
     class charger
     oneshot
 
+# create virtual SD card at /storage/sdcard0, based on the /data/media directory
+# daemon will drop to user/group system/media_rw after initializing
+# underlying files in /data/media will be created with user and group media_rw (1023)
+service sdcard /system/bin/sdcard -t2 /data/media/ /storage/sdcard0 1023 1023
+    class late_start
+
 service lpmkey /system/bin/lpmkey
     class charger
     oneshot
