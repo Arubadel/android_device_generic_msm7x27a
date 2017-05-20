@@ -97,10 +97,6 @@ PRODUCT_COPY_FILES += \
     device/samsung/msm7x27a-common/configs/etc/wifi/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
     device/samsung/msm7x27a-common/configs/bin/get_macaddrs:system/bin/get_macaddrs
 
-## Vold config
-PRODUCT_COPY_FILES += \
-    device/samsung/msm7x27a-common/configs/etc/vold.fstab:system/etc/vold.fstab
-
 ## Bluetooth config
 PRODUCT_COPY_FILES += \
     device/samsung/msm7x27a-common/configs/etc/init.qcom.bt.sh:system/etc/init.qcom.bt.sh \
