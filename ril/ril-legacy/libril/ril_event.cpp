@@ -15,7 +15,8 @@
 ** limitations under the License.
 */
 
-#define LOG_TAG "RILC"
+extern char g_log_tag[12];
+#define LOG_TAG ((const char *)g_log_tag)
 
 #include <stdlib.h>
 #include <unistd.h>

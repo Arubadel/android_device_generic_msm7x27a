@@ -19,7 +19,8 @@
 ** limitations under the License.
 */
 
-#define LOG_TAG "RILC"
+char g_log_tag[12] = "RILC_x";
+#define LOG_TAG ((const char *)g_log_tag)
 
 #include <hardware_legacy/power.h>
 
@@ -55,6 +56,10 @@
 
 #include <ril_event.h>
 #include <telephony/ril_log.h>
+
+#ifdef RIL_VARIANT_LEGACY
+#include "rilj.h"
+#endif
 
 namespace android {
 
@@ -121,12 +126,18 @@ typedef struct {
     int requestNumber;
     void (*dispatchFunction) (Parcel &p, struct RequestInfo *pRI);
     int(*responseFunction) (Parcel &p, void *response, size_t responselen);
+#ifdef RIL_VARIANT_LEGACY
+    int reqNumRILJ;
+#endif
 } CommandInfo;
 
 typedef struct {
     int requestNumber;
     int (*responseFunction) (Parcel &p, void *response, size_t responselen);
     WakeType wakeType;
+#ifdef RIL_VARIANT_LEGACY
+    int reqNumRILJ;
+#endif
 } UnsolResponseInfo;
 
 typedef struct RequestInfo {
@@ -273,6 +284,8 @@ extern "C" const char * failCauseToString(RIL_Errno);
 extern "C" const char * callStateToString(RIL_CallState);
 extern "C" const char * radioStateToString(RIL_RadioState);
 
+static int sendResponse (Parcel &p, int client_id);
+
 #ifdef RIL_SHLIB
 extern "C" void RIL_onUnsolicitedResponse(int unsolResponse, void *data,
                                 size_t datalen);
@@ -293,6 +306,8 @@ static CommandInfo s_commands[] = {
 static UnsolResponseInfo s_unsolResponses[] = {
 #include "ril_unsol_commands.h"
 };
+
+int extlog = 0;
 
 static char * RIL_getRilSocketName() {
     return rild;
@@ -364,6 +379,17 @@ void   nullParcelReleaseFunction (const uint8_t* data, size_t dataSize,
     // do nothing -- the data reference lives longer than the Parcel object
 }
 
+#ifdef RIL_VARIANT_LEGACY
+CommandInfo * getCmdInfoByReqId(int request) {
+    for (int32_t rq = 1; rq < (int32_t)NUM_ELEMS(s_commands); rq++) {
+        if (s_commands[rq].requestNumber == request) {
+            return &(s_commands[rq]);
+        }
+    }
+    return NULL;
+}
+#endif
+
 /**
  * To be called from dispatch thread
  * Issue a single local request, ensuring that the response
@@ -378,7 +404,11 @@ issueLocalRequest(int request, void *data, int len, int client_id) {
 
     pRI->local = 1;
     pRI->token = 0xffffffff;        // token is not used in this context
+#ifdef RIL_VARIANT_LEGACY
+    pRI->pCI = getCmdInfoByReqId(request);
+#else
     pRI->pCI = &(s_commands[request]);
+#endif
     pRI->client_id = client_id;
 
     ret = pthread_mutex_lock(&s_pendingRequestsMutex);
@@ -417,17 +447,59 @@ processCommandBuffer(void *buffer, size_t buflen, int client_id) {
         return 0;
     }
 
+#ifdef RIL_VARIANT_LEGACY
+    CommandInfo * ci = NULL;
+    if (request > 0) {
+        // Translate RILJ req_id to RILC req_id
+        for (int32_t rq = 1; rq < (int32_t)NUM_ELEMS(s_commands); rq++) {
+            if (s_commands[rq].reqNumRILJ == request) {
+                ci = &(s_commands[rq]);
+                break;
+            }
+        }
+        if (!ci) {
+            ci = getCmdInfoByReqId(request);
+        }
+        if (ci) {
+            if (ci->requestNumber <= 0) {
+                ci = NULL;
+            } else {
+                request = ci->requestNumber;
+            }
+        }
+    }
+
+    if (!ci) {
+#else
     if (request < 1 || request >= (int32_t)NUM_ELEMS(s_commands)) {
+#endif
+        Parcel pErr;
         ALOGE("unsupported request code %d token %d", request, token);
         // FIXME this should perhaps return a response
+        pErr.writeInt32 (RESPONSE_SOLICITED);
+        pErr.writeInt32 (token);
+#ifdef RIL_VARIANT_LEGACY
+        pErr.writeInt32 (RIL_E_REQUEST_NOT_SUPPORTED);
+#else
+        pErr.writeInt32 (RIL_E_GENERIC_FAILURE);
+#endif
+
+        sendResponse(pErr, client_id);
         return 0;
     }
 
+    if (extlog)
+        RLOGI("[ExtLog] > %s [id = %d, token = %d, size = %d]",
+            requestToString(request), request, token, buflen);
 
     pRI = (RequestInfo *)calloc(1, sizeof(RequestInfo));
 
     pRI->token = token;
+#ifdef RIL_VARIANT_LEGACY
+    pRI->pCI = ci;
+#else
     pRI->pCI = &(s_commands[request]);
+#endif
     pRI->client_id = client_id;
 
     ret = pthread_mutex_lock(&s_pendingRequestsMutex);
@@ -764,6 +836,15 @@ dispatchSIM_IO (Parcel &p, RequestInfo *pRI) {
     memset (&simIO, 0, sizeof(simIO));
 
     // note we only check status at the end
+
+#ifdef RIL_SUPPORTS_SEEK
+    simIO.v6.cla = 0;
+    if(pRI->pCI->requestNumber == RIL_REQUEST_SIM_TRANSMIT_BASIC ||
+            pRI->pCI->requestNumber == RIL_REQUEST_SIM_TRANSMIT_CHANNEL ) {
+        status = p.readInt32(&t);
+        simIO.v6.cla = (int)t;
+    }
+#endif
 
     status = p.readInt32(&t);
     simIO.v6.command = (int)t;
@@ -1569,15 +1650,27 @@ static void dispatchUiccSubscripton(Parcel &p, RequestInfo *pRI) {
     memset(&uicc_sub, 0, sizeof(uicc_sub));
 
     status = p.readInt32(&t);
+    if (status != NO_ERROR) {
+        goto invalid;
+    }
     uicc_sub.slot = (int) t;
 
     status = p.readInt32(&t);
+    if (status != NO_ERROR) {
+        goto invalid;
+    }
     uicc_sub.app_index = (int) t;
 
     status = p.readInt32(&t);
+    if (status != NO_ERROR) {
+        goto invalid;
+    }
     uicc_sub.sub_type = (RIL_SubscriptionType) t;
 
     status = p.readInt32(&t);
+    if (status != NO_ERROR) {
+        goto invalid;
+    }
     uicc_sub.act_status = (RIL_UiccSubActStatus) t;
     startRequest;
 
@@ -3306,6 +3399,31 @@ extern "C" void
 RIL_register (const RIL_RadioFunctions *callbacks, int client_id) {
     int ret;
     int flags;
+    char prop_name[120];
+    char prop_val[PROPERTY_VALUE_MAX];
+    int prop_len;
+
+    if (strcmp(RIL_getRilSocketName(), "rild") == 0) {
+        g_log_tag[5] = '0';
+    } else {
+        g_log_tag[5] = '1';
+    }
+    sprintf(prop_name, "ro.ril.delay_%c", g_log_tag[5]);
+    prop_len = property_get(prop_name, prop_val, "");
+    if (prop_len > 0) {
+        int delay = strtol(prop_val, NULL, 0);
+        if (delay > 0) {
+            RLOGI("delay = %d sec .... wait .....", delay);
+            sleep(delay);
+        }
+    } 
+    strcpy(prop_name, "ro.ril.extlog");
+    prop_len = property_get(prop_name, prop_val, "");
+    if (prop_len > 0) {
+        extlog = strtol(prop_val, NULL, 0);
+        RLOGI("extlog = %d", extlog);
+        if (extlog < 0) extlog = 0;
+    }
 
     if (callbacks == NULL) {
         ALOGE("RIL_register: RIL_RadioFunctions * null");
@@ -3335,6 +3453,7 @@ RIL_register (const RIL_RadioFunctions *callbacks, int client_id) {
 
     // Little self-check
 
+#ifndef RIL_VARIANT_LEGACY
     for (int i = 0; i < (int)NUM_ELEMS(s_commands); i++) {
         assert(i == s_commands[i].requestNumber);
     }
@@ -3343,6 +3462,7 @@ RIL_register (const RIL_RadioFunctions *callbacks, int client_id) {
         assert(i + RIL_UNSOL_RESPONSE_BASE
                 == s_unsolResponses[i].requestNumber);
     }
+#endif
 
     // New rild impl calls RIL_startEventLoop() first
     // old standalone impl wants it here.
@@ -3476,6 +3596,11 @@ RIL_onRequestComplete(RIL_Token t, RIL_Errno e, void *response, size_t responsel
 
         goto done;
     }
+
+    if (extlog)
+        RLOGI("[ExtLog] < %s [id = %d, token = %d, size = %d, cancelled = %d, err = %d]", 
+            requestToString(pRI->pCI->requestNumber), pRI->pCI->requestNumber, pRI->token, 
+            responselen, pRI->cancelled, (int)e);
 
     appendPrintBuf("[%04d]< %s",
         pRI->token, requestToString(pRI->pCI->requestNumber));
@@ -3675,7 +3800,9 @@ void
 RIL_onUnsolicitedSendResponse(int unsolResponse, void *data,
                                 size_t datalen, int client_id)
 {
+#ifndef RIL_VARIANT_LEGACY
     int unsolResponseIndex;
+#endif
     int ret;
     int64_t timeReceived = 0;
     bool shouldScheduleTimeout = false;
@@ -3687,6 +3814,32 @@ RIL_onUnsolicitedSendResponse(int unsolResponse, void *data,
         return;
     }
 
+#ifdef RIL_VARIANT_LEGACY
+    UnsolResponseInfo * uri = NULL;
+    int rilj_id = 0;
+    if (unsolResponse >= RIL_UNSOL_RESPONSE_BASE) {
+        // Translate RILJ res_id to RILC res_id
+        for (int32_t rq = 0; rq < (int32_t)NUM_ELEMS(s_unsolResponses); rq++) {
+            if (s_unsolResponses[rq].requestNumber == unsolResponse) {
+                uri = &(s_unsolResponses[rq]);
+                break;
+            }
+        }
+        if (uri) {
+            if (uri->reqNumRILJ > 0) {
+                rilj_id = uri->reqNumRILJ;
+            } else
+            if (uri->reqNumRILJ == 0) {
+                rilj_id = uri->requestNumber;
+            }
+        }
+    }
+
+    if (!uri || !rilj_id) {
+        ALOGE("unsupported unsolicited response code %d", unsolResponse);
+        return;
+    }
+#else
     unsolResponseIndex = unsolResponse - RIL_UNSOL_RESPONSE_BASE;
 
     if ((unsolResponseIndex < 0)
@@ -3694,11 +3847,20 @@ RIL_onUnsolicitedSendResponse(int unsolResponse, void *data,
         ALOGE("unsupported unsolicited response code %d", unsolResponse);
         return;
     }
+#endif
+
+    if (extlog)
+        RLOGI("[ExtLog] < %s [id = %d, size = %d]", 
+            requestToString(unsolResponse), unsolResponse, datalen);
 
     // Grab a wake lock if needed for this reponse,
     // as we exit we'll either release it immediately
     // or set a timer to release it later.
+#ifdef RIL_VARIANT_LEGACY
+    switch (uri->wakeType) {
+#else
     switch (s_unsolResponses[unsolResponseIndex].wakeType) {
+#endif
         case WAKE_PARTIAL:
             grabPartialWakeLock();
             shouldScheduleTimeout = true;
@@ -3724,10 +3886,15 @@ RIL_onUnsolicitedSendResponse(int unsolResponse, void *data,
     Parcel p;
 
     p.writeInt32 (RESPONSE_UNSOLICITED);
+#ifdef RIL_VARIANT_LEGACY
+    p.writeInt32 (rilj_id);
+    ret = uri->responseFunction(p, data, datalen);
+#else
     p.writeInt32 (unsolResponse);
 
     ret = s_unsolResponses[unsolResponseIndex]
                 .responseFunction(p, data, datalen);
+#endif
     if (ret != 0) {
         // Problem with the response. Don't continue;
         goto error_exit;
@@ -3836,7 +4003,7 @@ const char *
 failCauseToString(RIL_Errno e) {
     switch(e) {
         case RIL_E_SUCCESS: return "E_SUCCESS";
-        case RIL_E_RADIO_NOT_AVAILABLE: return "E_RAIDO_NOT_AVAILABLE";
+        case RIL_E_RADIO_NOT_AVAILABLE: return "E_RADIO_NOT_AVAILABLE";
         case RIL_E_GENERIC_FAILURE: return "E_GENERIC_FAILURE";
         case RIL_E_PASSWORD_INCORRECT: return "E_PASSWORD_INCORRECT";
         case RIL_E_SIM_PIN2: return "E_SIM_PIN2";
@@ -3929,6 +4096,11 @@ requestToString(int request) {
         case RIL_REQUEST_SEND_SMS_EXPECT_MORE: return "SEND_SMS_EXPECT_MORE";
         case RIL_REQUEST_SETUP_DATA_CALL: return "SETUP_DATA_CALL";
         case RIL_REQUEST_SIM_IO: return "SIM_IO";
+        case RIL_REQUEST_SIM_TRANSMIT_BASIC: return "SIM_TRANSMIT_BASIC";
+        case RIL_REQUEST_SIM_OPEN_CHANNEL: return "SIM_OPEN_CHANNEL";
+        case RIL_REQUEST_SIM_CLOSE_CHANNEL: return "SIM_CLOSE_CHANNEL";
+        case RIL_REQUEST_SIM_TRANSMIT_CHANNEL: return "SIM_TRANSMIT_CHANNEL";
+        case RIL_REQUEST_SIM_GET_ATR: return "SIM_GET_ATR";
         case RIL_REQUEST_SEND_USSD: return "SEND_USSD";
         case RIL_REQUEST_CANCEL_USSD: return "CANCEL_USSD";
         case RIL_REQUEST_GET_CLIR: return "GET_CLIR";
@@ -4020,8 +4192,6 @@ requestToString(int request) {
         case RIL_REQUEST_GET_UICC_SUBSCRIPTION: return "REQUEST_GET_UICC_SUBSCRIPTION";
         case RIL_REQUEST_GET_DATA_SUBSCRIPTION: return "REQUEST_GET_DATA_SUBSCRIPTION";
         case RIL_REQUEST_SET_SUBSCRIPTION_MODE: return "REQUEST_SET_SUBSCRIPTION_MODE";
-        case RIL_REQUEST_SET_SMS_PRE_STORE: return "REQUEST_SET_SMS_PRE_STORE";
-        case RIL_REQUEST_SET_SIM_SMS_READ: return "RIL_REQUEST_SET_SIM_SMS_READ";
         case RIL_UNSOL_RESPONSE_RADIO_STATE_CHANGED: return "UNSOL_RESPONSE_RADIO_STATE_CHANGED";
         case RIL_UNSOL_RESPONSE_CALL_STATE_CHANGED: return "UNSOL_RESPONSE_CALL_STATE_CHANGED";
         case RIL_UNSOL_RESPONSE_VOICE_NETWORK_STATE_CHANGED: return "UNSOL_RESPONSE_VOICE_NETWORK_STATE_CHANGED";
