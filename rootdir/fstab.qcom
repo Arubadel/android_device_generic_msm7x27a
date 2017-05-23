@@ -15,5 +15,4 @@
 /dev/block/mmcblk0p23    /preload    ext4    discard,noatime,nosuid,nodev,nomblk_io_submit,errors=panic    wait
 
 # vold managed volumes
-/devices/platform/msm_sdcc.3/mmc_host   /storage/sdcard0     auto     nosuid,nodev     wait,voldmanaged=sdcard0:24,nonremovable
 /devices/platform/msm_sdcc.1/mmc_host   /storage/sdcard1     auto     nosuid,nodev     wait,voldmanaged=sdcard1:auto
