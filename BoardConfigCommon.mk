@@ -99,6 +99,7 @@ TARGET_GRALLOC_USES_ASHMEM := true
 BOARD_EGL_NEEDS_LEGACY_FB := true
 HWUI_COMPILE_FOR_PERF := true
 #TARGET_HAS_OLD_QCOM_ION := true
+BOARD_CUSTOM_GRAPHICS := ../../../device/samsung/msm7x27a-common/rootdir/graphics/graphics.c ../../../device/samsung/msm7x27a-common/rootdir/graphics/graphics_overlay.c
 
 ## Bluetooth
 BOARD_HAVE_BLUETOOTH := true
