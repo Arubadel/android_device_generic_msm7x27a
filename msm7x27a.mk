@@ -123,6 +123,10 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
 	rild2
 
+## WebView
+PRODUCT_PACKAGES += \
+	libwebviewchromium
+
 ## Other
 PRODUCT_BUILD_PROP_OVERRIDES += BUILD_UTC_DATE=2
 PRODUCT_TAGS += dalvik.gc.type-precise
