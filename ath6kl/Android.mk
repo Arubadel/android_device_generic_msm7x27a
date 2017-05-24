@@ -1,3 +1,3 @@
-LOCAL_PATH := $(call my-dir)
-include $(LOCAL_PATH)/wpa_supplicant_8_lib/Android.mk
- 
+ifeq ($(BOARD_WLAN_DEVICE),ath6kl)
+    include $(call all-subdir-makefiles)
+endif
