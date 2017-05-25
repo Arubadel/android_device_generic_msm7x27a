@@ -9,16 +9,12 @@ lib/libdsprofile.so
 lib/libdss.so
 lib/libdsm.so
 lib/libdsi_netctrl.so
-lib/libdiag.so
 lib/liboncrpc.so
-lib/libnv.so
-lib/libqc-opt.so
 lib/libqcci_legacy.so
 lib/libqdi.so
 lib/libmmgsdilib.so
 lib/libwms.so
 lib/libqmiservices.so
-lib/libhwrpc.so
 lib/libidl.so
 lib/libqdp.so
 lib/libcneqmiutils.so
@@ -28,7 +24,6 @@ lib/libcneutils.so
 lib/libuim.so
 lib/libgsdi_exp.so
 lib/libcm.so
-lib/libnetmgr.so
 lib/libqmi.so
 lib/libauth.so
 lib/libcneapiclient.so
@@ -36,8 +31,7 @@ lib/libgstk_exp.so
 lib/libpbmlib.so
 lib/libwmsts.so
 lib/libping_mdm.so
-bin/qemu-props
+lib/libhwrpc.so
 bin/qmuxd
 bin/qmiproxy
-bin/qemud
 bin/netmgrd

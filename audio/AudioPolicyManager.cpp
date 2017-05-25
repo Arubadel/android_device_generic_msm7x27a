@@ -723,11 +723,12 @@ status_t AudioPolicyManager::setDeviceConnectionState(audio_devices_t device,
 #ifdef QCOM_FM_ENABLED
         if (device == AUDIO_DEVICE_OUT_FM) {
             if (state == AudioSystem::DEVICE_STATE_AVAILABLE) {
-                mOutputs.valueFor(mPrimaryOutput)->changeRefCount(AudioSystem::FM, 1);
+                mOutputs.valueFor(mPrimaryOutput)->changeRefCount(AudioSystem::MUSIC, 1);
                 newDevice = (audio_devices_t)(getNewDevice(mPrimaryOutput, false) | AUDIO_DEVICE_OUT_FM);
             } else {
-                mOutputs.valueFor(mPrimaryOutput)->changeRefCount(AudioSystem::FM, -1);
+                mOutputs.valueFor(mPrimaryOutput)->changeRefCount(AudioSystem::MUSIC, -1);
             }
+
             AudioParameter param = AudioParameter();
             param.addInt(String8("handle_fm"), (int)newDevice);
             ALOGV("setDeviceConnectionState() setParameters handle_fm");
@@ -1747,12 +1748,15 @@ status_t AudioPolicyManager::checkAndSetVolume(int stream, int index, audio_io_h
             mLastVoiceVolume = voiceVolume;
         }
 #ifdef QCOM_FM_ENABLED
-    } else if ((stream == AudioSystem::FM) && (mAvailableOutputDevices & AUDIO_DEVICE_OUT_FM)) {
+    } else if ((stream == AudioSystem::MUSIC) && (mAvailableOutputDevices & AUDIO_DEVICE_OUT_FM)) {
         float fmVolume = -1.0;
         fmVolume = (float)index/(float)mStreams[stream].mIndexMax;
         if (fmVolume >= 0 && output == mPrimaryOutput) {
-            ALOGV("Index = %d fmVolume = %f\n", index, fmVolume);
-            mpClientInterface->setFmVolume(fmVolume, delayMs);
+            AudioParameter param = AudioParameter();
+            param.addFloat(String8("fm_volume"), fmVolume);
+            ALOGV("checkAndSetVolume setParameters fm_volume, volume=:%f delay=:%d",fmVolume,delayMs*2);
+            //Double delayMs to avoid sound burst while device switch.
+            mpClientInterface->setParameters(mPrimaryOutput, param.toString(), delayMs*2);
             mLastVoiceVolume = fmVolume;
         }
 #endif

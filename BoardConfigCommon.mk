@@ -15,7 +15,7 @@
 # BoardConfig.mk
 #
 
-##  bootloader
+## Bootloader
 TARGET_NO_BOOTLOADER := true
 TARGET_NO_RADIOIMAGE := true
 
@@ -27,94 +27,74 @@ TARGET_BOARD_PLATFORM := msm7x27a
 TARGET_BOARD_PLATFORM_GPU := qcom-adreno200
 TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
-TARGET_ARCH_VARIANT_CPU := cortex-a9
-TARGET_CPU_VARIANT := cortex-a9
+TARGET_CPU_VARIANT := cortex-a5
 TARGET_SPECIFIC_HEADER_PATH := device/samsung/msm7x27a-common/include
-
-TARGET_GLOBAL_CFLAGS += -mtune=cortex-a9 -mfpu=neon -mfloat-abi=softfp
-TARGET_GLOBAL_CPPFLAGS += -mtune=cortex-a9 -mfpu=neon -mfloat-abi=softfp
-
-## Bionic
-TARGET_CORTEX_CACHE_LINE_32 := true
-ARCH_ARM_HAVE_32_BYTE_CACHE_LINES := true
+TARGET_USE_QCOM_BIONIC_OPTIMIZATION := true
 ARCH_ARM_HAVE_TLS_REGISTER := true
-TARGET_USE_SPARROW_BIONIC_OPTIMIZATION := true
+TARGET_GLOBAL_CFLAGS += -mtune=cortex-a5 -mfpu=neon-vfpv4 -mfloat-abi=softfp
+TARGET_GLOBAL_CPPFLAGS += -mtune=cortex-a5 -mfpu=neon-vfpv4 -mfloat-abi=softfp
 
-## Camera
-BOARD_USES_LEGACY_OVERLAY := true
-BOARD_NEEDS_MEMORYHEAPPMEM := true
-TARGET_DISABLE_ARM_PIE := true
-COMMON_GLOBAL_CFLAGS += -DBINDER_COMPAT
-COMMON_GLOBAL_CFLAGS += -DSAMSUNG_CAMERA_LEGACY
-COMMON_GLOBAL_CFLAGS += -DNEEDS_VECTORIMPL_SYMBOLS
-BOARD_USES_PROPRIETARY_OMX := samsung
-TARGET_QCOM_LEGACY_OMX := true
-COMMON_GLOBAL_CFLAGS += -DQCOM_NO_SECURE_PLAYBACK
-
-## kernel
-
+## Kernel
 BOARD_KERNEL_BASE := 0x00200000
 BOARD_KERNEL_PAGESIZE := 4096
-TARGET_KERNEL_SOURCE := kernel/samsung/msm7x27a
+BOARD_KERNEL_CMDLINE := androidboot.hardware=qcom androidboot.selinux=permissive
 BOARD_MKBOOTIMG_ARGS := --ramdisk_offset 0x01300000
+TARGET_KERNEL_SOURCE := kernel/samsung/msm7x27a
 
-# Enable dex-preoptimization to speed up first boot sequence
-ifeq ($(HOST_OS),linux)
-  ifeq ($(TARGET_BUILD_VARIANT),userdebug)
-    ifeq ($(WITH_DEXPREOPT),)
-      WITH_DEXPREOPT := true
-    endif
-  endif
-endif
+## FM Radio
+#BOARD_HAVE_QCOM_FM := true
 
-## ION
+## Memory
 TARGET_USES_ION := true
+BOARD_NEEDS_MEMORYHEAPPMEM := true
 BOARD_USE_MHEAP_SCREENSHOT := true
 
-## media
-TARGET_ENABLE_QC_AV_ENHANCEMENTS := true
+## Camera
+COMMON_GLOBAL_CFLAGS += -DBINDER_COMPAT -DNEEDS_VECTORIMPL_SYMBOLS -DSAMSUNG_CAMERA_LEGACY
+
+## Qcom hardwae
+BOARD_USES_QCOM_HARDWARE := true
+COMMON_GLOBAL_CFLAGS += -DQCOM_HARDWARE
+
+## Video
 TARGET_QCOM_MEDIA_VARIANT := legacy
-TARGET_HAS_QACT := true
+TARGET_ENABLE_QC_AV_ENHANCEMENTS := true
+COMMON_GLOBAL_CFLAGS += -DQCOM_LEGACY_MMPARSER
 
 ## Audio
-TARGET_PROVIDES_LIBAUDIO := true
-BOARD_USES_LEGACY_ALSA_AUDIO := true
 TARGET_QCOM_AUDIO_VARIANT := caf
+BOARD_USES_LEGACY_ALSA_AUDIO := true
+COMMON_GLOBAL_CFLAGS += -DNO_TUNNELED_SOURCE
+TARGET_HAS_QACT := true
 
-# Qcom Hardware
-COMMON_GLOBAL_CFLAGS += -DQCOM_HARDWARE -DQCOM_BSP
-BOARD_USES_QCOM_HARDWARE := true
-TARGET_USES_QCOM_BSP := true
-
-# Qcom Display
+## EGL, graphics
+USE_OPENGL_RENDERER := true
 TARGET_QCOM_DISPLAY_VARIANT := legacy
-COMMON_GLOBAL_CFLAGS += -DQCOM_LEGACY_MMPARSE
-BOARD_EGL_CFG := device/samsung/msm7x27a-common/configs/lib/egl/egl.cfg
-BOARD_EGL_WORKAROUND_BUG_10194508 := true
 TARGET_DOESNT_USE_FENCE_SYNC := true
 BOARD_ADRENO_DECIDE_TEXTURE_TARGET := true
-TARGET_PROVIDES_LIBLIGHT := true
-TARGET_DISPLAY_USE_RETIRE_FENCE := true
-BOARD_USE_MHEAP_SCREENSHOT := true
-USE_OPENGL_RENDERER := true
-TARGET_PROVIDES_LIBLIGHTS := true
-TARGET_GRALLOC_USES_ASHMEM := true
-BOARD_EGL_NEEDS_LEGACY_FB := true
-HWUI_COMPILE_FOR_PERF := true
-#TARGET_HAS_OLD_QCOM_ION := true
-BOARD_CUSTOM_GRAPHICS := ../../../device/samsung/msm7x27a-common/rootdir/graphics/graphics.c ../../../device/samsung/msm7x27a-common/rootdir/graphics/graphics_overlay.c
+BOARD_EGL_CFG := device/samsung/msm7x27a-common/prebuilt/lib/egl/egl.cfg
+
+## Qualcomm BSP
+TARGET_USES_QCOM_BSP := true
+COMMON_GLOBAL_CFLAGS += -DQCOM_BSP
+
+## GPS
+QCOM_GPS_PATH := device/samsung/msm7x27a-common/gps
+BOARD_USES_QCOM_LIBRPC := true
+BOARD_USES_QCOM_GPS := true
+BOARD_VENDOR_QCOM_GPS_LOC_API_AMSS_VERSION := 50000
+BOARD_VENDOR_QCOM_GPS_LOC_API_HARDWARE := $(TARGET_BOARD_PLATFORM)
 
 ## Bluetooth
 BOARD_HAVE_BLUETOOTH := true
-BOARD_BLUETOOTH_DOES_NOT_USE_RFKILL := true
 
 ## Wi-Fi
 BOARD_WLAN_DEVICE := ath6kl
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
-BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_ath6kl
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_$(BOARD_WLAN_DEVICE)
 BOARD_HOSTAPD_DRIVER := NL80211
-BOARD_HOSTAPD_PRIVATE_LIB := lib_driver_cmd_ath6kl
+BOARD_HOSTAPD_PRIVATE_LIB := lib_driver_cmd_$(BOARD_WLAN_DEVICE)
 WIFI_DRIVER_MODULE_AP_ARG := "suspend_mode=3 wow_mode=2 ath6kl_p2p=1 recovery_enable=1"
 WIFI_DRIVER_MODULE_ARG := "suspend_mode=3 wow_mode=2 ath6kl_p2p=1 recovery_enable=1"
 
@@ -127,6 +107,15 @@ BOARD_RIL_CLASS := ../../../device/samsung/msm7x27a-common/ril/
 COMMON_GLOBAL_CFLAGS += -DRIL_SUPPORTS_SEEK
 COMMON_GLOBAL_CFLAGS += -DRIL_VARIANT_LEGACY
 
+# Enable dex-preoptimization to speed up first boot sequence
+ifeq ($(HOST_OS),linux)
+  ifeq ($(TARGET_BUILD_VARIANT),userdebug)
+    ifeq ($(WITH_DEXPREOPT),)
+      WITH_DEXPREOPT := true
+    endif
+  endif
+endif
+
 ## Vold
 BOARD_VOLD_EMMC_SHARES_DEV_MAJOR := true
 BOARD_VOLD_MAX_PARTITIONS := 24
@@ -138,13 +127,29 @@ BOARD_UMS_LUNFILE := "/sys/devices/platform/msm_hsusb/gadget/lun%d/file"
 ## Samsung has weird framebuffer
 TARGET_NO_INITLOGO := true
 
-## Charging mode
-BOARD_LPM_BOOT_ARGUMENT_NAME := androidboot.boot_pause
-BOARD_LPM_BOOT_ARGUMENT_VALUE := batt
-#BOARD_CHARGER_RES := device/samsung/msm7x27a-common/res/charger
+# Charger
+BOARD_BATTERY_DEVICE_NAME := "battery"
+BOARD_CHARGER_ENABLE_SUSPEND := true
+BOARD_LPM_BOOT_ARGUMENT_NAME := androidboot.bootchg
+BOARD_LPM_BOOT_ARGUMENT_VALUE := true
+
+## Use device specific modules
+TARGET_PROVIDES_LIBLIGHTS := true
+
+## Override healthd HAL
+BOARD_HAL_STATIC_LIBRARIES := libhealthd.msm7x27a
+
+# Misc.
+TARGET_SYSTEM_PROP := device/samsung/msm7x27a-common/system.prop
+
+# Webview
+
+PRODUCT_PREBUILT_WEBVIEWCHROMIUM := yes
 
 ## Recovery
 TARGET_RECOVERY_FSTAB := device/samsung/msm7x27a-common/rootdir/fstab.qcom
+TARGET_RECOVERY_LCD_BACKLIGHT_PATH := \"/sys/class/leds/lcd-backlight/brightness\"
+TARGET_RECOVERY_SWIPE := true
 TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
 TARGET_USERIMAGES_USE_EXT4 := true
 BOARD_HAS_SDCARD_INTERNAL := true
@@ -152,22 +157,7 @@ BOARD_HAS_DOWNLOAD_MODE := true
 BOARD_USES_MMCUTILS := true
 BOARD_HAS_NO_MISC_PARTITION := true
 BOARD_FLASH_BLOCK_SIZE := 131072
-
-## Filesystem
-BOARD_DATA_DEVICE := /dev/block/mmcblk0p24
-BOARD_DATA_FILESYSTEM := ext4
-BOARD_DATA_FILESYSTEM_OPTIONS := rw
-BOARD_SYSTEM_DEVICE := /dev/block/mmcblk0p21
-BOARD_SYSTEM_FILESYSTEM := ext4
-BOARD_SYSTEM_FILESYSTEM_OPTIONS := rw
-BOARD_CACHE_DEVICE := /dev/block/mmcblk0p22
-BOARD_CACHE_FILESYSTEM := ext4
-BOARD_CACHE_FILESYSTEM_OPTIONS := rw
-
-## Webview building sucks
-
-PRODUCT_PREBUILT_WEBVIEWCHROMIUM := yes
-
+BOARD_CUSTOM_GRAPHICS := ../../../device/samsung/msm7x27a-common/rootdir/graphics/graphics.c ../../../device/samsung/msm7x27a-common/rootdir/graphics/graphics_overlay.c
 ## Partition sizes
 BOARD_BOOTIMAGE_PARTITION_SIZE := 12582912
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 12582912
