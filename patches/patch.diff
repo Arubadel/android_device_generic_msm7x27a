@@ -1,0 +1,13 @@
+diff --git a/frameworks/base/media/java/android/media/AudioService.java b/frameworks/base/media/java/android/media/AudioService.java
+index f95112f..aec02d0 100644
+--- a/frameworks/base/media/java/android/media/AudioService.java
++++ b/frameworks/base/media/java/android/media/AudioService.java
+@@ -214,7 +214,7 @@ public class AudioService extends IAudioService.Stub {
+ 
+    /** @hide Maximum volume index values for audio streams */
+     private static final int[] MAX_STREAM_VOLUME = new int[] {
+-        5,  // STREAM_VOICE_CALL
++        7,  // STREAM_VOICE_CALL
+         7,  // STREAM_SYSTEM
+         7,  // STREAM_RING
+         15, // STREAM_MUSIC
