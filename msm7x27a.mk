@@ -50,6 +50,25 @@ PRODUCT_PACKAGES += \
     power.msm7x27a \
     libhealthd.msm7x27a
 
+# Bluetooth
+PRODUCT_PACKAGES += \
+    bluetooth-headers \
+    hciconfig \
+    hciattach \
+    btmon \
+    btproxy \
+    bluetoothd-snoop \
+    btmgmt \
+    hcitool \
+    l2ping \
+    libsbc \
+    avinfo \
+    bccmd \
+    haltest \
+    libdbus \
+    audio.sco.default \
+    bluetoothd
+
 ## FM radio
 #PRODUCT_PACKAGES += \
 #    qcom.fmradio \

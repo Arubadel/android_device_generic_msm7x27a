@@ -32,6 +32,10 @@ lib/libpbmlib.so
 lib/libwmsts.so
 lib/libping_mdm.so
 lib/libhwrpc.so
+# camera
+
+lib/liboemcamera.so
+
 bin/qmuxd
 bin/qmiproxy
 bin/netmgrd
