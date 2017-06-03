@@ -39,12 +39,11 @@ import com.android.internal.telephony.cdma.CdmaInformationRecords;
 
 import com.android.internal.telephony.dataconnection.DataCallResponse;
 import com.android.internal.telephony.dataconnection.DcFailCause;
-import com.android.internal.telephony.dataconnection.DataProfileOmh;
 import com.android.internal.telephony.dataconnection.DataProfile;
 
 import com.android.internal.telephony.uicc.IccCardApplicationStatus;
 import com.android.internal.telephony.uicc.IccCardStatus;
-
+import com.android.internal.telephony.uicc.IccIoResult;
 import java.util.ArrayList;
 
 /**
@@ -77,6 +76,7 @@ public class JSRQualcommRIL extends RIL implements CommandsInterface {
     private final int RIL_INT_RADIO_ON          = 2;
     private final int RIL_INT_RADIO_ON_NG       = 10;
     private final int RIL_INT_RADIO_ON_HTC      = 13;
+    private int mSetPreferredNetworkType	= -1;
 
     public JSRQualcommRIL(Context context, int networkMode, int cdmaSubscription) {        
         super(context, networkMode, cdmaSubscription);
@@ -403,16 +403,16 @@ public class JSRQualcommRIL extends RIL implements CommandsInterface {
             switch (paramMessage.what) {
                 case EVENT_RADIO_ON:
                     mRadioOn = true;
-                    Log.d(LOG_TAG, "[JSR] Radio on -> Forcing sim status update");
+                    Log.d(RILJ_LOG_TAG, "[JSR] Radio on -> Forcing sim status update");
                     sendMessage(obtainMessage(EVENT_ICC_STATUS_CHANGED));
                     break;
 
                 case EVENT_ICC_STATUS_CHANGED:
                     if (mRadioOn) {
-                        Log.d(LOG_TAG, "[JSR] Received EVENT_ICC_STATUS_CHANGED, calling getIccCardStatus");
+                        Log.d(RILJ_LOG_TAG, "[JSR] Received EVENT_ICC_STATUS_CHANGED, calling getIccCardStatus");
                         mRil.getIccCardStatus(obtainMessage(EVENT_GET_ICC_STATUS_DONE, paramMessage.obj));
                     } else {
-                        Log.d(LOG_TAG, "[JSR] Received EVENT_ICC_STATUS_CHANGED while radio is not ON. Ignoring");
+                        Log.d(RILJ_LOG_TAG, "[JSR] Received EVENT_ICC_STATUS_CHANGED while radio is not ON. Ignoring");
                     }
                     break;
                     
@@ -420,7 +420,7 @@ public class JSRQualcommRIL extends RIL implements CommandsInterface {
                     Rlog.w(RILJ_LOG_TAG, "[JSR] EVENT_GET_ICC_STATUS_DONE");
                     AsyncResult asyncResult = (AsyncResult) paramMessage.obj;
                     if (asyncResult.exception != null) {
-                        Log.e (LOG_TAG, "[JSR] IccCardStatusDone shouldn't return exceptions!", asyncResult.exception);
+                        Log.e (RILJ_LOG_TAG, "[JSR] IccCardStatusDone shouldn't return exceptions!", asyncResult.exception);
                         break;
                     }
                     IccCardStatus status = (IccCardStatus) asyncResult.result;
@@ -433,10 +433,10 @@ public class JSRQualcommRIL extends RIL implements CommandsInterface {
                         int appIndex = -1;
                         if (mPhoneType == RILConstants.CDMA_PHONE && status.mCdmaSubscriptionAppIndex >= 0) {
                             appIndex = status.mCdmaSubscriptionAppIndex;
-                            Log.d(LOG_TAG, "[JSR] This is a CDMA PHONE: " + appIndex);
+                            Log.d(RILJ_LOG_TAG, "[JSR] This is a CDMA PHONE: " + appIndex);
                         } else {
                             appIndex = status.mGsmUmtsSubscriptionAppIndex;
-                            Log.d(LOG_TAG, "[JSR] This is a GSM PHONE: " + appIndex);
+                            Log.d(RILJ_LOG_TAG, "[JSR] This is a GSM PHONE: " + appIndex);
                             if (appIndex < 0) appIndex = 0;  // fixme
                         }
 
@@ -454,7 +454,7 @@ public class JSRQualcommRIL extends RIL implements CommandsInterface {
                                         mRil.setRadioState(CommandsInterface.RadioState.RADIO_ON);
                                         break;
                                     default:
-                                        Log.e(LOG_TAG, "[JSR] Currently we don't handle SIMs of type: " + app_type);
+                                        Log.e(RILJ_LOG_TAG, "[JSR] Currently we don't handle SIMs of type: " + app_type);
                                         return;
                                 }
                                 break;
@@ -466,7 +466,7 @@ public class JSRQualcommRIL extends RIL implements CommandsInterface {
                                         mRil.setRadioState(CommandsInterface.RadioState.RADIO_ON);
                                         break;
                                     default:
-                                        Log.e(LOG_TAG, "[JSR] Currently we don't handle SIMs of type: " + app_type);
+                                        Log.e(RILJ_LOG_TAG, "[JSR] Currently we don't handle SIMs of type: " + app_type);
                                         return;
                                 }
                                 break;
@@ -483,7 +483,7 @@ public class JSRQualcommRIL extends RIL implements CommandsInterface {
                     break;
                     
                 default:
-                    Log.e(LOG_TAG, "[JSR] Unknown Event " + paramMessage.what);
+                    Log.e(RILJ_LOG_TAG, "[JSR] Unknown Event " + paramMessage.what);
                     break;
             }
         }

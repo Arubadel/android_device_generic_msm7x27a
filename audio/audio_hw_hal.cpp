@@ -249,58 +249,6 @@ static int out_get_render_position(const struct audio_stream_out *stream,
     return out->qcom_out->getRenderPosition(dsp_frames);
 }
 
-static int out_set_observer(const struct audio_stream_out *stream,
-                                   void *observer)
-{
-    const struct qcom_stream_out *out =
-        reinterpret_cast<const struct qcom_stream_out *>(stream);
-    return out->qcom_out->setObserver(observer);
-}
-
-static int out_get_buffer_info(const struct audio_stream_out *stream,
-                                   buf_info ** buf)
-{
-    const struct qcom_stream_out *out =
-        reinterpret_cast<const struct qcom_stream_out *>(stream);
-    return out->qcom_out->getBufferInfo(buf);
-}
-
-static int out_is_buffer_available(const struct audio_stream_out *stream,
-                                   int *isAvail)
-{
-    const struct qcom_stream_out *out =
-        reinterpret_cast<const struct qcom_stream_out *>(stream);
-    return out->qcom_out->isBufferAvailable(isAvail);
-}
-
-static status_t out_start(struct audio_stream_out *stream)
-{
-    struct qcom_stream_out *out =
-        reinterpret_cast<struct qcom_stream_out *>(stream);
-    return out->qcom_out->start();
-}
-
-static status_t out_pause(struct audio_stream_out *stream)
-{
-    struct qcom_stream_out *out =
-        reinterpret_cast<struct qcom_stream_out *>(stream);
-    return out->qcom_out->pause();
-}
-
-static status_t out_flush(struct audio_stream_out *stream)
-{
-    struct qcom_stream_out *out =
-        reinterpret_cast<struct qcom_stream_out *>(stream);
-    return out->qcom_out->flush();
-}
-
-static status_t out_stop(struct audio_stream_out *stream)
-{
-    struct qcom_stream_out *out =
-        reinterpret_cast<struct qcom_stream_out *>(stream);
-    return out->qcom_out->stop();
-}
-
 static int out_add_audio_effect(const struct audio_stream *stream, effect_handle_t effect)
 {
     return 0;
@@ -317,6 +265,14 @@ static int out_get_next_write_timestamp(const struct audio_stream_out *stream,
     const struct qcom_stream_out *out =
         reinterpret_cast<const struct qcom_stream_out *>(stream);
     return out->qcom_out->getNextWriteTimestamp(timestamp);
+}
+
+static int out_get_presentation_position(const struct audio_stream_out *stream,
+                                         uint64_t *frames, struct timespec *timestamp)
+{
+    const struct qcom_stream_out *out =
+        reinterpret_cast<const struct qcom_stream_out *>(stream);
+    return out->qcom_out->getPresentationPosition(frames, timestamp);
 }
 
 /** audio_stream_in implementation **/
@@ -536,7 +492,8 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
                                    audio_devices_t devices,
                                    audio_output_flags_t flags,
                                    struct audio_config *config,
-                                   struct audio_stream_out **stream_out)
+                                   struct audio_stream_out **stream_out,
+                                   const char *address __unused)
 {
     struct qcom_audio_device *qadev = to_ladev(dev);
     status_t status;
@@ -576,13 +533,7 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
     out->stream.write = out_write;
     out->stream.get_render_position = out_get_render_position;
     out->stream.get_next_write_timestamp = out_get_next_write_timestamp;
-    out->stream.start = out_start;
-    out->stream.pause = out_pause;
-    out->stream.flush = out_flush;
-    out->stream.stop = out_stop;
-    out->stream.set_observer = out_set_observer;
-    out->stream.get_buffer_info = out_get_buffer_info;
-    out->stream.is_buffer_available = out_is_buffer_available;
+    out->stream.get_presentation_position = out_get_presentation_position;
 
     *stream_out = &out->stream;
     return 0;
@@ -608,7 +559,10 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
                                   audio_io_handle_t handle,
                                   audio_devices_t devices,
                                   struct audio_config *config,
-                                  struct audio_stream_in **stream_in)
+                                  struct audio_stream_in **stream_in,
+                                  audio_input_flags_t flags __unused,
+                                  const char *address __unused,
+                                  audio_source_t source __unused)
 {
     struct qcom_audio_device *qadev = to_ladev(dev);
     status_t status;
