@@ -27,6 +27,9 @@ PRODUCT_PACKAGES += \
     hwcomposer.msm7x27a \
     libtilerenderer
 
+# EGL
+PRODUCT_PACKAGES += libstlport
+
 ## Misc.
 PRODUCT_PACKAGES += \
     make_ext4fs \
@@ -87,6 +90,14 @@ PRODUCT_PACKAGES += \
 ## Device Custom Settings
 PRODUCT_PACKAGES += \
 	DeviceParts
+
+# WIFI
+PRODUCT_PACKAGES += libcnefeatureconfig
+PRODUCT_PACKAGES += libwpa_client
+PRODUCT_PACKAGES += hostapd
+PRODUCT_PACKAGES += dhcpcd.conf
+PRODUCT_PACKAGES += wpa_supplicant
+PRODUCT_PACKAGES += wpa_supplicant.conf
 
 ## Permissions
 PRODUCT_COPY_FILES += \
