@@ -78,6 +78,9 @@ on boot
     chown bluetooth bluetooth /sys/devices/platform/msm_serial_hs.0/clock
     chmod 0660 /sys/devices/platform/msm_serial_hs.0/clock
 
+    # TelephonyManager.java requires this
+    chmod 0644 /proc/cmdline
+
     # create QMUX deamon socket area
     mkdir /dev/socket/qmux_radio 0770 radio radio
     chmod 2770 /dev/socket/qmux_radio
@@ -258,9 +261,6 @@ service sensord /system/bin/sensord
     class main
     oneshot
 
-    # TelephonyManager.java requires this
-    chmod 0644 /proc/cmdline
-
 on charger
     # enable powersave governor when charging
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "powersave"
@@ -294,6 +294,7 @@ service qmuxd /system/bin/qmuxd
 
 service netmgrd /system/bin/netmgrd
     class main
+    group radio
 
 service thermald /system/bin/thermald -c /system/etc/thermald.conf
     class main
@@ -382,10 +383,17 @@ service fm_dl /system/bin/sh /system/etc/init.qcom.fm.sh
     disabled
     oneshot
 
+service_redefine ril-daemon /system/bin/rild
+    class main
+    socket rild stream 660 root radio
+    socket rild-debug stream 660 radio system
+    user root
+    group radio cache inet misc audio log qcom_diag qcom_oncrpc
+
 service ril-daemon1 /system/bin/rild -c 1
     class main
-    socket rild1 stream 660 root radio
-    socket rild-debug1 stream 660 radio system
+    socket rild2 stream 660 root radio
+    socket rild-debug2 stream 660 radio system
     user root
     group radio cache inet misc audio sdcard_rw qcom_oncrpc qcom_diag log
 

@@ -22,7 +22,7 @@ TARGET_NO_RADIOIMAGE := true
 ## Platform
 TARGET_ARCH := arm
 TARGET_ARCH_VARIANT := armv7-a-neon
-TARGET_ARCH_LOWMEM := true
+#TARGET_ARCH_LOWMEM := true
 TARGET_BOARD_PLATFORM := msm7x27a
 TARGET_BOARD_PLATFORM_GPU := qcom-adreno200
 TARGET_CPU_ABI := armeabi-v7a
@@ -78,7 +78,7 @@ BOARD_EGL_CFG := device/samsung/msm7x27a-common/prebuilt/lib/egl/egl.cfg
 
 ## Qualcomm BSP
 TARGET_USES_QCOM_BSP := true
-#COMMON_GLOBAL_CFLAGS += -DQCOM_BSP
+COMMON_GLOBAL_CFLAGS += -DQCOM_BSP
 
 ## GPS
 QCOM_GPS_PATH := device/samsung/msm7x27a-common/gps
