@@ -22,6 +22,7 @@ ro.ril.telephony.mqanelements=5
 ro.telephony.default_network=3
 ro.telephony.default_cdma_sub=0
 ro.telephony.call_ring.multiple=false
+ro.telephony.call_ring=false
 telephony.lteOnCdmaDevice=0
 #ro.cdma.factory=china
 #ro.cdma.subscribe_on_ruim_ready=true
