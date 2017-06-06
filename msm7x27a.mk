@@ -116,8 +116,11 @@ PRODUCT_COPY_FILES += \
 
 ## Media
 PRODUCT_COPY_FILES += \
-    device/samsung/msm7x27a-common/prebuilt/etc/media_profiles.xml:system/etc/media_profiles.xml \
-    device/samsung/msm7x27a-common/prebuilt/etc/media_codecs.xml:system/etc/media_codecs.xml
+	device/samsung/msm7x27a-common/prebuilt/etc/media_profiles.xml:system/etc/media_profiles.xml \
+	device/samsung/msm7x27a-common/prebuilt/etc/media_codecs.xml:system/etc/media_codecs.xml \
+	frameworks/av/media/libstagefright/data/media_codecs_google_audio.xml:system/etc/media_codecs_google_audio.xml \
+	frameworks/av/media/libstagefright/data/media_codecs_google_telephony.xml:system/etc/media_codecs_google_telephony.xml \
+	frameworks/av/media/libstagefright/data/media_codecs_google_video_le.xml:system/etc/media_codecs_google_video_le.xml
 
 ## Rootdir
 PRODUCT_COPY_FILES += \
@@ -177,7 +180,10 @@ PRODUCT_COPY_FILES += \
 $(call inherit-product, build/target/product/full.mk)
 $(call inherit-product, vendor/samsung/msm7x27a-common/msm7x27a-common-vendor.mk)
 $(call inherit-product, device/common/gps/gps_eu_supl.mk)
-$(call inherit-product, frameworks/native/build/phone-hdpi-512-dalvik-heap.mk)
+
+# Dalvik heap config
+include frameworks/native/build/phone-hdpi-512-dalvik-heap.mk
+include frameworks/native/build/phone-xxhdpi-2048-hwui-memory.mk
 
 ## Other
 PRODUCT_BUILD_PROP_OVERRIDES += BUILD_UTC_DATE=2
