@@ -1,13 +1,202 @@
+diff --git a/bionic/linker/linker.cpp b/bionic/linker/linker.cpp
+index 54867dc..0ff2de9 100644
+--- a/bionic/linker/linker.cpp
++++ b/bionic/linker/linker.cpp
+@@ -2178,10 +2178,10 @@ bool soinfo::LinkImage(const android_dlextinfo* extinfo) {
+   if (has_text_relocations) {
+     // Make segments writable to allow text relocations to work properly. We will later call
+     // phdr_table_protect_segments() after all of them are applied and all constructors are run.
+-    DL_WARN("%s has text relocations. This is wasting memory and prevents "
++    DEBUG("%s has text relocations. This is wasting memory and prevents "
+             "security hardening. Please fix.", name);
+     if (phdr_table_unprotect_segments(phdr, phnum, load_bias) < 0) {
+-      DL_ERR("can't unprotect loadable segments for \"%s\": %s",
++      DEBUG("can't unprotect loadable segments for \"%s\": %s",
+              name, strerror(errno));
+       return false;
+     }
+diff --git a/frameworks/av/include/media/stagefright/MediaCodecSource.h b/frameworks/av/include/media/stagefright/MediaCodecSource.h
+index edd6494..a376809 100644
+--- a/frameworks/av/include/media/stagefright/MediaCodecSource.h
++++ b/frameworks/av/include/media/stagefright/MediaCodecSource.h
+@@ -40,8 +40,11 @@ class MetaData;
+ struct MediaCodecSource : public MediaSource,
+                           public MediaBufferObserver {
+     enum FlagBits {
+-        FLAG_USE_SURFACE_INPUT      = 1,
+-        FLAG_USE_METADATA_INPUT     = 2,
++        FLAG_USE_SURFACE_INPUT           = 1,
++        FLAG_USE_METADATA_INPUT          = 2,
++#ifdef USE_SUBMIT_ONE_INPUT_BUFFER
++	FLAG_USE_SUBMIT_ONE_INPUT_BUFFER = 3,
++#endif
+     };
+ 
+     static sp<MediaCodecSource> Create(
+diff --git a/frameworks/av/media/libmedia/Android.mk b/frameworks/av/media/libmedia/Android.mk
+index 73157bb..70112de 100644
+--- a/frameworks/av/media/libmedia/Android.mk
++++ b/frameworks/av/media/libmedia/Android.mk
+@@ -77,7 +77,7 @@ LOCAL_SRC_FILES:= \
+ LOCAL_SRC_FILES += ../libnbaio/roundup.c
+ 
+ ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
+-ifneq ($(filter msm7x30 msm8660 msm8960,$(TARGET_BOARD_PLATFORM)),)
++ifneq ($(filter msm7x30 msm7x27a msm8660 msm8960,$(TARGET_BOARD_PLATFORM)),)
+ ifeq ($(BOARD_USES_LEGACY_ALSA_AUDIO),true)
+ LOCAL_SRC_FILES += \
+     IDirectTrack.cpp \
+@@ -87,11 +87,9 @@ endif
+ endif
+ 
+ #QTI Resampler
+-ifeq ($(call is-vendor-board-platform,QCOM),true)
+ ifeq ($(strip $(AUDIO_FEATURE_ENABLED_EXTN_RESAMPLER)),true)
+ LOCAL_CFLAGS += -DQTI_RESAMPLER
+ endif
+-endif
+ #QTI Resampler
+ 
+ ifeq ($(TARGET_ENABLE_QC_AV_ENHANCEMENTS),true)
+diff --git a/frameworks/av/media/libmediaplayerservice/Android.mk b/frameworks/av/media/libmediaplayerservice/Android.mk
+index 8f06c55..c906412 100644
+--- a/frameworks/av/media/libmediaplayerservice/Android.mk
++++ b/frameworks/av/media/libmediaplayerservice/Android.mk
+@@ -73,6 +73,10 @@ ifeq ($(strip $(AUDIO_FEATURE_ENABLED_EXTN_FLAC_DECODER)),true)
+ endif
+ endif
+ 
++ifeq ($(TARGET_BOARD_PLATFORM),msm7x27a)
++    LOCAL_CFLAGS += -DUSE_SUBMIT_ONE_INPUT_BUFFER
++endif
++
+ include $(BUILD_SHARED_LIBRARY)
+ 
+ include $(call all-makefiles-under,$(LOCAL_PATH))
+diff --git a/frameworks/av/media/libmediaplayerservice/StagefrightRecorder.cpp b/frameworks/av/media/libmediaplayerservice/StagefrightRecorder.cpp
+index 90d4a25..bc10e1a 100644
+--- a/frameworks/av/media/libmediaplayerservice/StagefrightRecorder.cpp
++++ b/frameworks/av/media/libmediaplayerservice/StagefrightRecorder.cpp
+@@ -1339,6 +1339,9 @@ void StagefrightRecorder::clipVideoFrameWidth() {
+ 
+ status_t StagefrightRecorder::checkVideoEncoderCapabilities(
+         bool *supportsCameraSourceMetaDataMode) {
++#ifdef USE_SUBMIT_ONE_INPUT_BUFFER
++    *supportsCameraSourceMetaDataMode = true;
++#else
+     /* hardware codecs must support camera source meta data mode */
+     Vector<CodecCapabilities> codecs;
+     OMXClient client;
+@@ -1355,6 +1358,7 @@ status_t StagefrightRecorder::checkVideoEncoderCapabilities(
+             false /* decoder */, true /* hwCodec */, &codecs);
+ 
+     *supportsCameraSourceMetaDataMode = codecs.size() > 0;
++#endif
+     ALOGV("encoder %s camera source meta-data mode",
+             *supportsCameraSourceMetaDataMode ? "supports" : "DOES NOT SUPPORT");
+ 
+@@ -1726,6 +1730,9 @@ status_t StagefrightRecorder::setupVideoEncoder(
+     uint32_t flags = 0;
+     if (mIsMetaDataStoredInVideoBuffers) {
+         flags |= MediaCodecSource::FLAG_USE_METADATA_INPUT;
++#ifdef USE_SUBMIT_ONE_INPUT_BUFFER
++        flags |= MediaCodecSource::FLAG_USE_SUBMIT_ONE_INPUT_BUFFER;
++#endif
+     }
+ 
+     if (cameraSource == NULL) {
+diff --git a/frameworks/av/media/libstagefright/Android.mk b/frameworks/av/media/libstagefright/Android.mk
+index 6131388..5628cf2 100644
+--- a/frameworks/av/media/libstagefright/Android.mk
++++ b/frameworks/av/media/libstagefright/Android.mk
+@@ -126,7 +126,7 @@ LOCAL_SHARED_LIBRARIES := \
+         libpowermanager
+ 
+ ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
+-ifneq ($(filter msm7x30 msm8660 msm8960,$(TARGET_BOARD_PLATFORM)),)
++ifneq ($(filter msm7x30 msm7x27a msm8660 msm8960,$(TARGET_BOARD_PLATFORM)),)
+ ifeq ($(BOARD_USES_LEGACY_ALSA_AUDIO),true)
+    ifeq ($(USE_TUNNEL_MODE),true)
+         LOCAL_CFLAGS += -DUSE_TUNNEL_MODE
+@@ -144,14 +144,12 @@ LOCAL_CFLAGS += -DBOARD_CANT_REALLOCATE_OMX_BUFFERS
+ endif
+ 
+ #QTI FLAC Decoder
+-ifeq ($(call is-vendor-board-platform,QCOM),true)
+ LOCAL_C_INCLUDES += $(TARGET_OUT_HEADERS)/mm-audio
+ ifeq ($(strip $(AUDIO_FEATURE_ENABLED_EXTN_FLAC_DECODER)),true)
+ LOCAL_SRC_FILES += FLACDecoder.cpp
+ LOCAL_C_INCLUDES += $(TARGET_OUT_HEADERS)/mm-audio/audio-flac
+ LOCAL_CFLAGS += -DQTI_FLAC_DECODER
+ endif
+-endif
+ 
+ LOCAL_STATIC_LIBRARIES := \
+         libstagefright_color_conversion \
+@@ -166,8 +164,6 @@ LOCAL_STATIC_LIBRARIES := \
+         libFLAC \
+         libmedia_helper
+ 
+-ifeq ($(call is-vendor-board-platform,QCOM),true)
+-
+ ifeq ($(TARGET_USES_QCOM_BSP), true)
+     LOCAL_C_INCLUDES += $(call project-path-for,qcom-display)/libgralloc
+ endif
+@@ -184,7 +180,6 @@ endif #TARGET_ENABLE_AV_ENHANCEMENTS
+ ifeq ($(strip $(AUDIO_FEATURE_ENABLED_FLAC_OFFLOAD)),true)
+        LOCAL_CFLAGS     += -DFLAC_OFFLOAD_ENABLED
+ endif
+-endif
+ 
+ ifeq ($(BOARD_USE_S3D_SUPPORT), true)
+ ifeq ($(BOARD_USES_HWC_SERVICES), true)
+@@ -264,6 +259,10 @@ ifeq ($(BOARD_USE_SEIREN_AUDIO), true)
+ LOCAL_CFLAGS += -DUSE_SEIREN_AUDIO
+ endif
+ 
++ifeq ($(TARGET_BOARD_PLATFORM),msm7x27a)
++    LOCAL_CFLAGS += -DUSE_SUBMIT_ONE_INPUT_BUFFER
++endif
++
+ LOCAL_MODULE:= libstagefright
+ 
+ LOCAL_MODULE_TAGS := optional
+diff --git a/frameworks/av/media/libstagefright/MediaCodecSource.cpp b/frameworks/av/media/libstagefright/MediaCodecSource.cpp
+index 7c81570..2134ab4 100644
+--- a/frameworks/av/media/libstagefright/MediaCodecSource.cpp
++++ b/frameworks/av/media/libstagefright/MediaCodecSource.cpp
+@@ -432,6 +432,12 @@ status_t MediaCodecSource::initEncoder() {
+         mOutputFormat->setInt32("store-metadata-in-buffers", 1);
+     }
+ 
++#ifdef USE_SUBMIT_ONE_INPUT_BUFFER
++	if (mFlags & FLAG_USE_SUBMIT_ONE_INPUT_BUFFER) {
++        mOutputFormat->setInt32("Only-Submit-One-Input-Buffer-At-One-Time", 1);
++    }
++#endif
++
+     if (mFlags & FLAG_USE_SURFACE_INPUT) {
+         mOutputFormat->setInt32("create-input-buffers-suspended", 1);
+     }
 diff --git a/frameworks/base/media/java/android/media/AudioService.java b/frameworks/base/media/java/android/media/AudioService.java
-index f95112f..aec02d0 100644
+index 41dc270..e385976 100644
 --- a/frameworks/base/media/java/android/media/AudioService.java
 +++ b/frameworks/base/media/java/android/media/AudioService.java
-@@ -214,7 +214,7 @@ public class AudioService extends IAudioService.Stub {
+@@ -274,7 +274,7 @@ public class AudioService extends IAudioService.Stub {
  
     /** @hide Maximum volume index values for audio streams */
-     private static final int[] MAX_STREAM_VOLUME = new int[] {
+     private static int[] MAX_STREAM_VOLUME = new int[] {
 -        5,  // STREAM_VOICE_CALL
 +        7,  // STREAM_VOICE_CALL
          7,  // STREAM_SYSTEM
          7,  // STREAM_RING
          15, // STREAM_MUSIC
+@@ -287,7 +287,7 @@ public class AudioService extends IAudioService.Stub {
+     };
+ 
+     private static int[] DEFAULT_STREAM_VOLUME = new int[] {
+-        4,  // STREAM_VOICE_CALL
++        7,  // STREAM_VOICE_CALL
+         7,  // STREAM_SYSTEM
+         5,  // STREAM_RING
+         11, // STREAM_MUSIC
