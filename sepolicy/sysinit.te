@@ -9,4 +9,5 @@ allow sysinit rild_exec:file getattr;
 allow sysinit self:capability sys_admin;
 allow sysinit block_device:blk_file { read open ioctl };
 allow sysinit kernel:process setsched;
+allow sysinit system_file:dir write;
 
