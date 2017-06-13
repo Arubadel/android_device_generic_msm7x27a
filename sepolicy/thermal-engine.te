@@ -1,0 +1,7 @@
+allow thermal-engine self:netlink_kobject_uevent_socket { read create bind setopt };
+allow thermal-engine socket_device:dir w_dir_perms;
+allow thermal-engine self:process execmem;
+allow thermal-engine audio_device:chr_file { read open write };
+allow thermal-engine device:chr_file { read open write ioctl };
+allow thermal-engine self:capability net_admin;
+allow thermal-engine sysfs_devices_system_cpu:file write;

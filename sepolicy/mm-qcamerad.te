@@ -1,0 +1,5 @@
+#============= mm-qcamerad ==============
+allow mm-qcamerad audio_device:dir search;
+allow mm-qcamerad audio_device:chr_file { read open write ioctl };
+allow mm-qcamerad system_data_file:sock_file { unlink create };
+

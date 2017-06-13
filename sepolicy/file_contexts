@@ -1,0 +1,2 @@
+/system/bin/thermald                            u:object_r:thermal-engine_exec:s0
+

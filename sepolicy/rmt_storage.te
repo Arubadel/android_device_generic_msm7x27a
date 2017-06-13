@@ -1,0 +1,4 @@
+#============= rmt_storage ==============
+allow rmt_storage self:process execmem;
+allow rmt_storage device:chr_file { read open write ioctl };
+allow rmt_storage block_device:blk_file { read open write };

@@ -1,0 +1,4 @@
+#============= untrusted_app ==============
+allow untrusted_app device:chr_file { read write ioctl open };
+allow untrusted_app graphics_device:dir search;
+allow untrusted_app recovery_cache_file:dir getattr;

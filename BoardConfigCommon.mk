@@ -149,6 +149,32 @@ TARGET_SYSTEM_PROP := device/samsung/msm7x27a-common/system.prop
 
 #PRODUCT_PREBUILT_WEBVIEWCHROMIUM := yes
 
+BOARD_SEPOLICY_DIRS += \
+       device/samsung/msm7x27a-common/sepolicy
+
+BOARD_SEPOLICY_UNION += \
+       file_contexts \
+       untrusted_app.te \
+       wpa.te \
+       platform_app.te \
+       sysinit.te \
+       zygote.te \
+       system_server.te \
+       system_app.te \
+       qmuxd.te \
+       surfaceflinger.te \
+       vold.te \
+       mediaserver.te \
+       mm-qcamerad.te \
+       bootanim.te \
+       mpdecision.te \
+       radio.te \
+       rmt_storage.te \
+       netmgrd.te \
+       init.te \
+       rild.te \
+       thermal-engine.te \
+
 ## Recovery
 TARGET_RECOVERY_FSTAB := device/samsung/msm7x27a-common/rootdir/fstab.qcom
 TARGET_RECOVERY_LCD_BACKLIGHT_PATH := \"/sys/class/leds/lcd-backlight/brightness\"
@@ -163,5 +189,5 @@ BOARD_FLASH_BLOCK_SIZE := 131072
 ## Partition sizes
 BOARD_BOOTIMAGE_PARTITION_SIZE := 12582912
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 12582912
-BOARD_SYSTEMIMAGE_PARTITION_SIZE := 524288000
+BOARD_SYSTEMIMAGE_PARTITION_SIZE := 824288000
 BOARD_USERDATAIMAGE_PARTITION_SIZE := 979369984

@@ -1,0 +1,12 @@
+#============= sysinit ==============
+allow sysinit logdr_socket:sock_file write;
+allow sysinit system_data_file:dir { write add_name };
+allow sysinit system_data_file:file { write create open };
+allow sysinit logd:unix_stream_socket connectto;
+allow sysinit block_device:dir search;
+allow sysinit labeledfs:filesystem remount;
+allow sysinit rild_exec:file getattr;
+allow sysinit self:capability sys_admin;
+allow sysinit block_device:blk_file { read open ioctl };
+allow sysinit kernel:process setsched;
+

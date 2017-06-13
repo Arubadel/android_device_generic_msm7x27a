@@ -1,0 +1,4 @@
+#============= wpa ==============
+allow wpa devpts:chr_file { read open write getattr write ioctl };
+allow wpa init:unix_dgram_socket { read write };
+

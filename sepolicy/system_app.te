@@ -1,0 +1,6 @@
+#============= system_app ==============
+allow system_app device:chr_file { read open write  getattr write ioctl };
+allow system_app shell_data_file:dir search;
+allow system_app graphics_device:dir search;
+allow system_app graphics_device:chr_file { read write };
+

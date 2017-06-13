@@ -1,0 +1,7 @@
+#============= system_server ==============
+allow system_server device:chr_file { read write ioctl open getattr };
+allow system_server graphics_device:chr_file { read write ioctl open };
+allow system_server media_rw_data_file:file { execute open };
+allow system_app sysfs:file { write setattr };
+allow system_server graphics_device:dir search;
+allow system_server init:unix_dgram_socket sendto;

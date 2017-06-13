@@ -1,0 +1,8 @@
+#============= bootanim ==============
+allow bootanim device:chr_file { read write ioctl open };
+allow bootanim graphics_device:chr_file { read write ioctl open };
+allow bootanim self:process execmem;
+allow bootanim media_rw_data_file:file { read getattr open execute };
+allow bootanim graphics_device:dir search;
+allow bootanim shell_data_file:dir search;
+

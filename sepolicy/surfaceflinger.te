@@ -1,0 +1,5 @@
+#============= surfaceflinger ==============
+allow surfaceflinger device:chr_file { read write ioctl open };
+allow surfaceflinger self:process execmem;
+allow surfaceflinger system_server_service:service_manager add;
+allow surfaceflinger shell_data_file:dir search;

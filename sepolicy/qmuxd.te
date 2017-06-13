@@ -1,0 +1,2 @@
+#============= qmuxd ==============
+allow qmuxd self:process execmem;
