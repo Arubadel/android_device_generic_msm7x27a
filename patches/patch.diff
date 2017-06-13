@@ -407,7 +407,7 @@ index 423be14..81102ff 100644
      proc:dir_file_class_set write;
  
 diff --git a/external/sepolicy/domain.te b/external/sepolicy/domain.te
-index bfb5f05..dc9e66f 100644
+index bfb5f05..8f0e8bb 100644
 --- a/external/sepolicy/domain.te
 +++ b/external/sepolicy/domain.te
 @@ -255,31 +255,31 @@ neverallow domain init:binder call;
@@ -454,3 +454,14 @@ index bfb5f05..dc9e66f 100644
  neverallow {
      domain
      -appdomain # for oemfs
+@@ -291,8 +291,8 @@ neverallow { domain -init -recovery } property_data_file:dir { create setattr re
+ neverallow { domain -init -recovery } property_data_file:file { create setattr relabelfrom write append unlink link rename };
+ 
+ # Only recovery should be doing writes to /system
+-neverallow { domain -recovery } { system_file exec_type }:dir_file_class_set
+-    { create write setattr relabelfrom relabelto append unlink link rename };
++#neverallow { domain -recovery } { system_file exec_type }:dir_file_class_set
++#    { create write setattr relabelfrom relabelto append unlink link rename };
+ 
+ # Nothing should be writing to files in the rootfs.
+ neverallow { domain -recovery } rootfs:file { create write setattr relabelto append unlink link rename };
