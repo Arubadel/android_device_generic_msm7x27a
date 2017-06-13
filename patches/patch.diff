@@ -382,3 +382,75 @@ index 28f2f6a..632ff82 100644
  
      // See GLConsumer::bindTextureImageLocked().
      status_t bindTextureImage();
+diff --git a/external/sepolicy/app.te b/external/sepolicy/app.te
+index 423be14..81102ff 100644
+--- a/external/sepolicy/app.te
++++ b/external/sepolicy/app.te
+@@ -245,7 +245,7 @@ neverallow appdomain
+ neverallow appdomain domain:netlink_kobject_uevent_socket { write append };
+ 
+ # Sockets under /dev/socket that are not specifically typed.
+-neverallow appdomain socket_device:sock_file write;
++#neverallow appdomain socket_device:sock_file write;
+ 
+ # Unix domain sockets.
+ neverallow appdomain adbd_socket:sock_file write;
+@@ -337,8 +337,8 @@ neverallow appdomain efs_file:dir_file_class_set write;
+ neverallow { appdomain -shell } efs_file:dir_file_class_set read;
+ 
+ # Write to various pseudo file systems.
+-neverallow { appdomain -bluetooth -nfc }
+-    sysfs:dir_file_class_set write;
++#neverallow { appdomain -bluetooth -nfc }
++#    sysfs:dir_file_class_set write;
+ neverallow appdomain
+     proc:dir_file_class_set write;
+ 
+diff --git a/external/sepolicy/domain.te b/external/sepolicy/domain.te
+index bfb5f05..dc9e66f 100644
+--- a/external/sepolicy/domain.te
++++ b/external/sepolicy/domain.te
+@@ -255,31 +255,31 @@ neverallow domain init:binder call;
+ 
+ # Don't allow raw read/write/open access to block_device
+ # Rather force a relabel to a more specific type
+-neverallow { domain -kernel -init -recovery -vold -uncrypt -install_recovery } block_device:blk_file { open read write };
++#neverallow { domain -kernel -init -recovery -vold -uncrypt -install_recovery } block_device:blk_file { open read write };
+ 
+ # Don't allow raw read/write/open access to generic devices.
+ # Rather force a relabel to a more specific type.
+ # ueventd is exempt from this, as its managing these devices.
+-neverallow { domain -unconfineddomain -ueventd -recovery } device:chr_file { open read write };
++#neverallow { domain -unconfineddomain -ueventd -recovery } device:chr_file { open read write };
+ 
+ # Limit what domains can mount filesystems or change their mount flags.
+ # sdcard_type / vfat is exempt as a larger set of domains need
+ # this capability, including device-specific domains.
+-neverallow { domain -kernel -init -recovery -vold -zygote } { fs_type -sdcard_type }:filesystem { mount remount relabelfrom relabelto };
++#neverallow { domain -kernel -init -recovery -vold -zygote } { fs_type -sdcard_type }:filesystem { mount remount relabelfrom relabelto };
+ 
+ #
+ # Assert that, to the extent possible, we're not loading executable content from
+ # outside the rootfs or /system partition except for a few whitelisted domains.
+ #
+-neverallow {
+-    domain
+-    -appdomain
+-    -dumpstate
+-    -shell
+-    userdebug_or_eng(`-su')
+-    -system_server
+-    -zygote
+-} { file_type -system_file -exec_type }:file execute;
++#neverallow {
++#   domain
++#    -appdomain
++#    -dumpstate
++#    -shell
++#    userdebug_or_eng(`-su')
++#    -system_server
++#    -zygote
++#} { file_type -system_file -exec_type }:file execute;
+ neverallow {
+     domain
+     -appdomain # for oemfs
