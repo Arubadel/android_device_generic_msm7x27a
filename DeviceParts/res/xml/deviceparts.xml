@@ -7,4 +7,9 @@
         android:title="@string/button_backlight_title_head"
         android:defaultValue="true" />
 
+    <CheckBoxPreference
+        android:key="soft_keys"
+        android:title="@string/button_soft_keys"
+        android:defaultValue="false" />
+
 </PreferenceScreen>

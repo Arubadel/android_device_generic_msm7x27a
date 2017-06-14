@@ -15,10 +15,12 @@ import android.preference.PreferenceScreen;
 public class DeviceSettings extends PreferenceActivity {
 
     private static final String KEY_BUTTON_BACKLIGHT = "button_backlight";
+    private static final String SOFT_KEYS = "soft_keys";
 
     private static final String BUTTON_BACKLIGHT_FILE = "/sys/class/sec/sec_touchkey/brightness";
 
     private CheckBoxPreference mButtonBacklight;
+    private CheckBoxPreference mSoft_keys;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -27,6 +29,10 @@ public class DeviceSettings extends PreferenceActivity {
         addPreferencesFromResource(R.xml.deviceparts);
 
         mButtonBacklight = (CheckBoxPreference) findPreference(KEY_BUTTON_BACKLIGHT);
+        mSoft_keys = (CheckBoxPreference) findPreference(SOFT_KEYS);
+	PreferenceScreen screen = getPreferenceScreen();
+	Preference pref = getPreferenceManager().findPreference(SOFT_KEYS);
+	screen.removePreference(pref);
 
     }
 
@@ -49,6 +55,19 @@ public class DeviceSettings extends PreferenceActivity {
         } else {
             return super.onPreferenceTreeClick(preferenceScreen, preference);
         }
+
+        if (key.equals(SOFT_KEYS)) {
+            final CheckBoxPreference chkPref = (CheckBoxPreference) preference;
+            value = chkPref.isChecked() ? 1 : 0;
+            if (value == 1) {
+                Utils.command("setprop qemu.hw.mainkeys 0");
+            } else {
+		Utils.command("setprop qemu.hw.mainkeys 1");
+            }
+        } else {
+            return super.onPreferenceTreeClick(preferenceScreen, preference);
+        }
+
         return true;
     }
 
@@ -62,6 +81,11 @@ public class DeviceSettings extends PreferenceActivity {
         } else {
             Utils.writeValue(BUTTON_BACKLIGHT_FILE, 0);
             Utils.setNonWritable(BUTTON_BACKLIGHT_FILE);
+        }
+        if (prefs.getBoolean(SOFT_KEYS, true)) {
+            Utils.command("setprop qemu.hw.mainkeys 0");
+        } else {
+            Utils.command("setprop qemu.hw.mainkeys 1");
         }
     }
 

@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name">Advanced settings</string>
     <string name="button_backlight_title_head">Button backlight</string>
+    <string name="button_soft_keys">Soft Keys</string>
 </resources>
