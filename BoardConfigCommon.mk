@@ -39,7 +39,7 @@ BOARD_KERNEL_BASE := 0x00200000
 BOARD_KERNEL_PAGESIZE := 4096
 BOARD_KERNEL_CMDLINE := androidboot.hardware=qcom androidboot.selinux=permissive
 BOARD_MKBOOTIMG_ARGS := --ramdisk_offset 0x01300000
-TARGET_KERNEL_SOURCE := kernel/samsung/msm7x27a
+#TARGET_KERNEL_SOURCE := kernel/samsung/msm7x27a
 KERNEL_TOOLCHAIN := $(ANDROID_BUILD_TOP)/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6
 KERNEL_TOOLCHAIN_PREFIX := bin/arm-eabi-
 
