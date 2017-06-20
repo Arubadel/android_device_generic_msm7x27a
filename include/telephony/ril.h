@@ -310,6 +310,9 @@ typedef struct {
 } RIL_Dial;
 
 typedef struct {
+#ifdef RIL_SUPPORTS_SEEK
+    int cla;
+#endif
     int command;    /* one of the commands listed for TS 27.007 +CRSM*/
     int fileid;     /* EF id */
     char *path;     /* "pathid" from TS 27.007 +CRSM command.
@@ -324,6 +327,9 @@ typedef struct {
 } RIL_SIM_IO_v5;
 
 typedef struct {
+#ifdef RIL_SUPPORTS_SEEK
+    int cla;
+#endif
     int command;    /* one of the commands listed for TS 27.007 +CRSM*/
     int fileid;     /* EF id */
     char *path;     /* "pathid" from TS 27.007 +CRSM command.
@@ -3796,40 +3802,88 @@ typedef struct {
 #define RIL_REQUEST_SET_SUBSCRIPTION_MODE 122
 
 /**
- *  RIL_REQUEST_SET_SMS_PRE_STORE
+ * RIL_REQUEST_SIM_TRANSMIT_BASIC
  *
- *  Sets the sms preferred storage
- * "data" is const int *
- * ((const int *)data) [0]    1 indicates none, mean phone memory
-                              2 indicates card like SIM/USIM
+ * Request APDU exchange on the basic channel.
  *
- * "response" is NULL
+ * "data" is a const RIL_SIM_IO *
  *
- *  Valid errors:
+ * "response" is a const RIL_SIM_IO_Response *
  *
- *  SUCCESS
- *  GENERIC_FAILURE
+ * Valid errors:
  *
+ * SUCCESS
+ * TO DO: add erros
  */
-#define RIL_REQUEST_SET_SMS_PRE_STORE 123
+#define RIL_REQUEST_SIM_TRANSMIT_BASIC 123
 
 /**
- *  RIL_REQUEST_SET_SIM_SMS_READ
+ * RIL_REQUEST_SIM_OPEN_CHANNEL
  *
- *  Sets the sms preferred storage
- * "data" is const int *
- * ((const int *)data) [0]    1 indicates index
-                              2 indicates message_mode, GW or CDMA
+ * Open a new logical channel.
+ *
+ * "data" is a const char * containing the AID of the applet
+ *
+ * "response" is a int * containing the channel id
+ *
+ * Valid errors:
+ *
+ * SUCCESS
+ * TO DO: add erros
+ */
+#define RIL_REQUEST_SIM_OPEN_CHANNEL 124
+
+/**
+ * RIL_REQUEST_SIM_CLOSE_CHANNEL
+ *
+ * Close a previoulsy opened logical channel.
+ *
+ * "data" is a const int * containing the channel id
  *
  * "response" is NULL
  *
- *  Valid errors:
+ * Valid errors:
  *
- *  SUCCESS
- *  GENERIC_FAILURE
- *
+ * SUCCESS
+ * TO DO: add erros
  */
-#define RIL_REQUEST_SET_SIM_SMS_READ 124
+#define RIL_REQUEST_SIM_CLOSE_CHANNEL 125
+
+/**
+ * RIL_REQUEST_SIM_TRANSMIT_CHANNEL
+ *
+ * Exchange APDUs with a UICC over a previously opened logical channel.
+ *
+ * "data" is a const RIL_SIM_IO_v7_CAF *
+ *
+ * "response" is a const RIL_SIM_IO_Response *
+ *
+ * Valid errors:
+ *
+ * SUCCESS
+ * TO DO: add erros
+ */
+#define RIL_REQUEST_SIM_TRANSMIT_CHANNEL 126
+
+/**
+ * RIL_REQUEST_SIM_GET_ATR
+ *
+ * Get the ATR from SIM Card
+ *
+ * Only valid when radio state is "RADIO_STATE_ON"
+ *
+ * "data" is const int *
+ * ((const int *)data)[0] contains the slot index on the SIM from which ATR is requested.
+ *
+ * "response" is a const char * containing the ATR, See ETSI 102.221 8.1 and ISO/IEC 7816 3
+ *
+ * Valid errors:
+ *
+ * SUCCESS
+ * RADIO_NOT_AVAILABLE (radio resetting)
+ * GENERIC_FAILURE
+ */
+#define RIL_REQUEST_SIM_GET_ATR 127
 
 /***********************************************************************/
 

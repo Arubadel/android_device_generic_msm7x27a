@@ -30,7 +30,6 @@ TARGET_CPU_ABI2 := armeabi
 TARGET_ARCH_VARIANT_CPU := cortex-a9
 TARGET_CPU_VARIANT := cortex-a9
 TARGET_SPECIFIC_HEADER_PATH := device/samsung/msm7x27a-common/include
-
 TARGET_GLOBAL_CFLAGS += -mtune=cortex-a9 -mfpu=neon -mfloat-abi=softfp
 TARGET_GLOBAL_CPPFLAGS += -mtune=cortex-a9 -mfpu=neon -mfloat-abi=softfp
 
@@ -69,6 +68,11 @@ endif
 ## ION
 TARGET_USES_ION := true
 
+## GPS
+QCOM_GPS_PATH := device/samsung/msm7x27a-common/gps
+BOARD_USES_QCOM_LIBRPC := true
+BOARD_USES_QCOM_GPS := true
+
 ## media
 TARGET_ENABLE_QC_AV_ENHANCEMENTS := true
 TARGET_QCOM_MEDIA_VARIANT := legacy
@@ -86,7 +90,7 @@ BOARD_USES_QCOM_HARDWARE := true
 TARGET_USES_QCOM_BSP := true
 
 # Qcom Display
-TARGET_QCOM_DISPLAY_VARIANT := caf
+TARGET_QCOM_DISPLAY_VARIANT := legacy
 BOARD_EGL_CFG := device/samsung/msm7x27a-common/configs/lib/egl/egl.cfg
 BOARD_ADRENO_DECIDE_TEXTURE_TARGET := true
 TARGET_PROVIDES_LIBLIGHT := true

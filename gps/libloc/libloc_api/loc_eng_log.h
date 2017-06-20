@@ -1,4 +1,4 @@
-/* Copyright (c) 2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2011 Code Aurora Forum. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -9,7 +9,7 @@
  *       copyright notice, this list of conditions and the following
  *       disclaimer in the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of The Linux Foundation nor the names of its
+ *     * Neither the name of Code Aurora Forum, Inc. nor the names of its
  *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
@@ -27,49 +27,29 @@
  *
  */
 
-#ifndef ANDROID_RIL_MSIM_H
-#define ANDROID_RIL_MSIM_H 1
+#ifndef LOC_ENG_LOG_H
+#define LOC_ENG_LOG_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+extern int loc_eng_callback_log_header(
+      rpc_loc_client_handle_type            client_handle,          /* client handle        */
+      rpc_loc_event_mask_type               loc_event,              /* event mask           */
+      const rpc_loc_event_payload_u_type*   loc_event_payload       /* payload              */
+);
 
-#define MAX_RILDS 3
-#define MAX_CLIENT_ID_LENGTH 2
-#define MAX_SOCKET_NAME_LENGTH 6
-#define MAX_DEBUG_SOCKET_NAME_LENGTH 12
-#define MAX_QEMU_PIPE_NAME_LENGTH 11
+extern int loc_eng_callback_log(
+      rpc_loc_event_mask_type               loc_event,              /* event mask           */
+      const rpc_loc_event_payload_u_type*   loc_event_payload       /* payload              */
+);
 
-typedef enum {
-  RIL_UICC_SUBSCRIPTION_DEACTIVATE = 0,
-  RIL_UICC_SUBSCRIPTION_ACTIVATE = 1
-} RIL_UiccSubActStatus;
+extern const char* loc_get_event_name(rpc_loc_event_mask_type loc_event_mask);
+extern const char* loc_get_ioctl_type_name(rpc_loc_ioctl_e_type ioctl_type);
+extern const char* loc_get_ioctl_status_name(uint32 status);
+extern const char* loc_get_sess_status_name(rpc_loc_session_status_e_type status);
+extern const char* loc_get_engine_state_name(rpc_loc_engine_state_e_type state);
+extern const char* loc_get_fix_session_state_name(rpc_loc_fix_session_state_e_type state);
+extern const char* log_succ_fail_string(int is_succ);
+extern const char* loc_get_gps_status_name(GpsStatusValue gps_status);
 
-typedef enum {
-  RIL_SUBSCRIPTION_1 = 0,
-  RIL_SUBSCRIPTION_2 = 1
-} RIL_SubscriptionType;
+extern char *loc_eng_get_time(char *time_string);
 
-typedef struct {
-  int   slot;                        /* 0, 1, ... etc. */
-  int   app_index;                   /* array subscriptor from applications[RIL_CARD_MAX_APPS] in
-                                        RIL_REQUEST_GET_SIM_STATUS */
-  RIL_SubscriptionType  sub_type;    /* Indicates subscription 0 or subscription 1 */
-  RIL_UiccSubActStatus  act_status;
-} RIL_SelectUiccSub;
-
-/**
- * @param unsolResponse is one of RIL_UNSOL_RESPONSE_*
- * @param data is pointer to data defined for that RIL_UNSOL_RESPONSE_*
- *     "data" is owned by caller, and should not be modified or freed by callee
- * @param datalen the length of data in byte
- */
-
-void RIL_onUnsolicitedResponse2(int unsolResponse, const void *data,
-                                size_t datalen);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /*ANDROID_RIL_MSIM_H*/
+#endif /* LOC_ENG_LOG_H */

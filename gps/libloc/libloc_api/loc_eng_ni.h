@@ -1,4 +1,4 @@
-/* Copyright (c) 2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2009,2011 Code Aurora Forum. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -9,7 +9,7 @@
  *       copyright notice, this list of conditions and the following
  *       disclaimer in the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of The Linux Foundation nor the names of its
+ *     * Neither the name of Code Aurora Forum, Inc. nor the names of its
  *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
@@ -27,49 +27,33 @@
  *
  */
 
-#ifndef ANDROID_RIL_MSIM_H
-#define ANDROID_RIL_MSIM_H 1
+#ifndef LOC_ENG_NI_H
+#define LOC_ENG_NI_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#define LOC_NI_NO_RESPONSE_TIME            20                      /* secs */
 
-#define MAX_RILDS 3
-#define MAX_CLIENT_ID_LENGTH 2
-#define MAX_SOCKET_NAME_LENGTH 6
-#define MAX_DEBUG_SOCKET_NAME_LENGTH 12
-#define MAX_QEMU_PIPE_NAME_LENGTH 11
+#define LOC_NI_NOTIF_KEY_ADDRESS           "Address"
 
-typedef enum {
-  RIL_UICC_SUBSCRIPTION_DEACTIVATE = 0,
-  RIL_UICC_SUBSCRIPTION_ACTIVATE = 1
-} RIL_UiccSubActStatus;
-
-typedef enum {
-  RIL_SUBSCRIPTION_1 = 0,
-  RIL_SUBSCRIPTION_2 = 1
-} RIL_SubscriptionType;
+extern const GpsNiInterface sLocEngNiInterface;
 
 typedef struct {
-  int   slot;                        /* 0, 1, ... etc. */
-  int   app_index;                   /* array subscriptor from applications[RIL_CARD_MAX_APPS] in
-                                        RIL_REQUEST_GET_SIM_STATUS */
-  RIL_SubscriptionType  sub_type;    /* Indicates subscription 0 or subscription 1 */
-  RIL_UiccSubActStatus  act_status;
-} RIL_SelectUiccSub;
+   pthread_t               loc_ni_thread;            /* NI thread */
+   pthread_mutex_t         loc_ni_lock;
+   int                     response_time_left;       /* examine time for NI response */
+   boolean                 user_response_received;   /* NI User reponse received or not from Java layer*/
+   boolean                 notif_in_progress;        /* NI notification/verification in progress */
+   rpc_loc_ni_event_s_type loc_ni_request;
+   int                     current_notif_id;         /* ID to check against response */
+   rpc_loc_ni_user_resp_e_type resp;
+} loc_eng_ni_data_s_type;
 
-/**
- * @param unsolResponse is one of RIL_UNSOL_RESPONSE_*
- * @param data is pointer to data defined for that RIL_UNSOL_RESPONSE_*
- *     "data" is owned by caller, and should not be modified or freed by callee
- * @param datalen the length of data in byte
- */
+// Functions for sLocEngNiInterface
+extern void loc_eng_ni_init(GpsNiCallbacks *callbacks);
+extern void loc_eng_ni_respond(int notif_id, GpsUserResponseType user_response);
 
-void RIL_onUnsolicitedResponse2(int unsolResponse, const void *data,
-                                size_t datalen);
+extern int loc_eng_ni_callback (
+      rpc_loc_event_mask_type               loc_event,              /* event mask           */
+      const rpc_loc_event_payload_u_type*   loc_event_payload       /* payload              */
+);
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif /*ANDROID_RIL_MSIM_H*/
+#endif /* LOC_ENG_NI_H */

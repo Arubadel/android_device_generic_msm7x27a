@@ -1,4 +1,4 @@
-/* Copyright (c) 2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2009,2011 Code Aurora Forum. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -9,7 +9,7 @@
  *       copyright notice, this list of conditions and the following
  *       disclaimer in the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of The Linux Foundation nor the names of its
+ *     * Neither the name of Code Aurora Forum, Inc. nor the names of its
  *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
@@ -27,49 +27,42 @@
  *
  */
 
-#ifndef ANDROID_RIL_MSIM_H
-#define ANDROID_RIL_MSIM_H 1
+#include <hardware/gps.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdlib.h>
 
-#define MAX_RILDS 3
-#define MAX_CLIENT_ID_LENGTH 2
-#define MAX_SOCKET_NAME_LENGTH 6
-#define MAX_DEBUG_SOCKET_NAME_LENGTH 12
-#define MAX_QEMU_PIPE_NAME_LENGTH 11
+extern const GpsInterface* get_gps_interface();
 
-typedef enum {
-  RIL_UICC_SUBSCRIPTION_DEACTIVATE = 0,
-  RIL_UICC_SUBSCRIPTION_ACTIVATE = 1
-} RIL_UiccSubActStatus;
-
-typedef enum {
-  RIL_SUBSCRIPTION_1 = 0,
-  RIL_SUBSCRIPTION_2 = 1
-} RIL_SubscriptionType;
-
-typedef struct {
-  int   slot;                        /* 0, 1, ... etc. */
-  int   app_index;                   /* array subscriptor from applications[RIL_CARD_MAX_APPS] in
-                                        RIL_REQUEST_GET_SIM_STATUS */
-  RIL_SubscriptionType  sub_type;    /* Indicates subscription 0 or subscription 1 */
-  RIL_UiccSubActStatus  act_status;
-} RIL_SelectUiccSub;
-
-/**
- * @param unsolResponse is one of RIL_UNSOL_RESPONSE_*
- * @param data is pointer to data defined for that RIL_UNSOL_RESPONSE_*
- *     "data" is owned by caller, and should not be modified or freed by callee
- * @param datalen the length of data in byte
- */
-
-void RIL_onUnsolicitedResponse2(int unsolResponse, const void *data,
-                                size_t datalen);
-
-#ifdef __cplusplus
+const GpsInterface* gps__get_gps_interface(struct gps_device_t* dev)
+{
+    return get_gps_interface();
 }
-#endif
 
-#endif /*ANDROID_RIL_MSIM_H*/
+static int open_gps(const struct hw_module_t* module, char const* name,
+        struct hw_device_t** device)
+{
+    struct gps_device_t *dev = malloc(sizeof(struct gps_device_t));
+    memset(dev, 0, sizeof(*dev));
+
+    dev->common.tag = HARDWARE_DEVICE_TAG;
+    dev->common.version = 0;
+    dev->common.module = (struct hw_module_t*)module;
+    dev->get_gps_interface = gps__get_gps_interface;
+
+    *device = (struct hw_device_t*)dev;
+    return 0;
+}
+
+static struct hw_module_methods_t gps_module_methods = {
+    .open = open_gps
+};
+
+struct hw_module_t HAL_MODULE_INFO_SYM = {
+    .tag = HARDWARE_MODULE_TAG,
+    .version_major = 1,
+    .version_minor = 0,
+    .id = GPS_HARDWARE_MODULE_ID,
+    .name = "loc_api GPS Module",
+    .author = "Qualcomm USA, Inc.",
+    .methods = &gps_module_methods,
+};

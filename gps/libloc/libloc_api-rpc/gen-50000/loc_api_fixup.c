@@ -1,4 +1,4 @@
-/* Copyright (c) 2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2011, Code Aurora Forum. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -9,7 +9,7 @@
  *       copyright notice, this list of conditions and the following
  *       disclaimer in the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of The Linux Foundation nor the names of its
+ *     * Neither the name of Code Aurora Forum, Inc. nor the names of its
  *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
@@ -24,52 +24,29 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
  */
 
-#ifndef ANDROID_RIL_MSIM_H
-#define ANDROID_RIL_MSIM_H 1
+#include <rpc/rpc.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "loc_api_fixup.h"
 
-#define MAX_RILDS 3
-#define MAX_CLIENT_ID_LENGTH 2
-#define MAX_SOCKET_NAME_LENGTH 6
-#define MAX_DEBUG_SOCKET_NAME_LENGTH 12
-#define MAX_QEMU_PIPE_NAME_LENGTH 11
+#ifdef ADD_XDR_FLOAT
 
-typedef enum {
-  RIL_UICC_SUBSCRIPTION_DEACTIVATE = 0,
-  RIL_UICC_SUBSCRIPTION_ACTIVATE = 1
-} RIL_UiccSubActStatus;
-
-typedef enum {
-  RIL_SUBSCRIPTION_1 = 0,
-  RIL_SUBSCRIPTION_2 = 1
-} RIL_SubscriptionType;
-
-typedef struct {
-  int   slot;                        /* 0, 1, ... etc. */
-  int   app_index;                   /* array subscriptor from applications[RIL_CARD_MAX_APPS] in
-                                        RIL_REQUEST_GET_SIM_STATUS */
-  RIL_SubscriptionType  sub_type;    /* Indicates subscription 0 or subscription 1 */
-  RIL_UiccSubActStatus  act_status;
-} RIL_SelectUiccSub;
-
-/**
- * @param unsolResponse is one of RIL_UNSOL_RESPONSE_*
- * @param data is pointer to data defined for that RIL_UNSOL_RESPONSE_*
- *     "data" is owned by caller, and should not be modified or freed by callee
- * @param datalen the length of data in byte
- */
-
-void RIL_onUnsolicitedResponse2(int unsolResponse, const void *data,
-                                size_t datalen);
-
-#ifdef __cplusplus
+int
+xdr_float(xdrp, fp)
+        XDR *xdrp;
+        float *fp;
+{
+        return xdr_long(xdrp, (long*)fp);
 }
-#endif
 
-#endif /*ANDROID_RIL_MSIM_H*/
+int
+xdr_double(xdrp, dp)
+        XDR *xdrp;
+        double *dp;
+{
+                return xdr_long(xdrp, (long*)dp + 1)
+                                && xdr_long(xdrp, (long*)dp);
+}
+
+#endif /* ADD_XDR_FLOAT */

@@ -167,6 +167,20 @@ int main(int argc, char **argv)
         RIL_setRilSocketName("rild1");
     }
 
+    if (atoi(clientId) >= MAX_RILDS) {
+        RLOGE("Max Number of rild's supported is: %d", MAX_RILDS);
+        exit(0);
+    }
+    RLOGD ("RIL Client Id:=%s", clientId);
+
+    if (strncmp(clientId, "0", MAX_CLIENT_ID_LENGTH)) {
+        if (RIL_setRilSocketName) {
+            RIL_setRilSocketName(clientId);
+        } else {
+            RLOGE("Trying to instantiate multiple rild sockets without a compatible libril!");
+        }
+    }
+
     if (rilLibPath == NULL) {
         if ( 0 == property_get(LIB_PATH_PROPERTY, libPath, NULL)) {
             // No lib sepcified on the command line, and nothing set in props.
