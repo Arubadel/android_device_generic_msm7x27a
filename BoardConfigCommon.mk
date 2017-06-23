@@ -39,7 +39,7 @@ BOARD_KERNEL_BASE := 0x00200000
 BOARD_KERNEL_PAGESIZE := 4096
 BOARD_KERNEL_CMDLINE := androidboot.hardware=qcom androidboot.selinux=permissive
 BOARD_MKBOOTIMG_ARGS := --ramdisk_offset 0x01300000
-TARGET_KERNEL_SOURCE := kernel/samsung/msm7x27a
+#TARGET_KERNEL_SOURCE := kernel/samsung/msm7x27a
 
 ## FM Radio
 #BOARD_HAVE_QCOM_FM := true
@@ -142,7 +142,7 @@ TARGET_SYSTEM_PROP := device/samsung/msm7x27a-common/system.prop
 
 # Webview
 
-PRODUCT_PREBUILT_WEBVIEWCHROMIUM := yes
+#PRODUCT_PREBUILT_WEBVIEWCHROMIUM := yes
 
 ## Recovery
 TARGET_RECOVERY_FSTAB := device/samsung/msm7x27a-common/rootdir/fstab.qcom

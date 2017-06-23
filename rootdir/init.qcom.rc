@@ -243,6 +243,23 @@ on boot
     chmod 0664 /sys/class/sensors/proximity_sensor/vendor
     chmod 0664 /sys/class/sensors/proximity_sensor/prox_cal
 
+
+    write /sys/module/pm2/modes/cpu0/standalone_power_collapse/idle_enabled 1
+    write /sys/module/pm2/modes/cpu1/standalone_power_collapse/idle_enabled 1
+    write /sys/module/pm2/modes/cpu2/standalone_power_collapse/idle_enabled 1
+    write /sys/module/pm2/modes/cpu3/standalone_power_collapse/idle_enabled 1
+    write /sys/module/pm2/modes/cpu0/standalone_power_collapse/suspend_enabled 1
+    write /sys/module/pm2/modes/cpu1/standalone_power_collapse/suspend_enabled 1
+    write /sys/module/pm2/modes/cpu2/standalone_power_collapse/suspend_enabled 1
+    write /sys/module/pm2/modes/cpu3/standalone_power_collapse/suspend_enabled 1
+    write /sys/module/pm2/modes/cpu0/power_collapse/suspend_enabled 1
+    write /sys/module/pm2/modes/cpu0/power_collapse/idle_enabled 1
+    write /sys/devices/system/cpu/cpufreq/ondemand/sampling_rate 25000
+
+    chown system /sys/devices/system/cpu/cpufreq/ondemand/sampling_rate
+    chown system /sys/devices/system/cpu/cpufreq/ondemand/sampling_down_factor
+    chown system /sys/devices/system/cpu/cpufreq/ondemand/io_is_busy
+
     chown system system /efs/prox_cal    
     chmod 0666 /efs/prox_cal
 
@@ -299,6 +316,9 @@ service thermald /system/bin/thermald -c /system/etc/thermald.conf
     class main
 
 service mpdecision /system/bin/mpdecision --no_sleep --avg_comp
+    class main
+
+service qosmgrd /system/bin/qosmgr /system/etc/qosmgr_rules.xml
     class main
 
 service qcamerasvr /system/bin/mm-qcamera-daemon
