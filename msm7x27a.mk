@@ -114,8 +114,8 @@ PRODUCT_COPY_FILES += \
     device/samsung/msm7x27a-common/rootdir/init.qcom.usb.rc:root/init.qcom.usb.rc \
     device/samsung/msm7x27a-common/rootdir/ueventd.qcom.rc:root/ueventd.qcom.rc \
     device/samsung/msm7x27a-common/rootdir/lpm.rc:root/lpm.rc \
-    device/samsung/msm7x27a-common/rootdir/fstab.qcom:root/fstab.qcom
-
+    device/samsung/msm7x27a-common/rootdir/fstab.qcom:root/fstab.qcom \
+    device/samsung/msm7x27a-common/rootdir/init.qcom.bt.rc:root/init.qcom.bt.rc
 
 ## FM
 PRODUCT_COPY_FILES += \
@@ -162,6 +162,11 @@ PRODUCT_COPY_FILES += \
     device/samsung/msm7x27a-common/prebuilt/etc/calib.dat:system/etc/calib.dat \
     device/samsung/msm7x27a-common/prebuilt/etc/param.dat:system/etc/param.dat \
     device/samsung/msm7x27a-common/prebuilt/etc/sensors.dat:system/etc/sensors.dat
+
+## Bluez files
+PRODUCT_COPY_FILES += \
+    device/samsung/msm7x27a-common/prebuilt/etc/init.bt.sh:system/etc/init.bt.sh \
+    device/samsung/msm7x27a-common/prebuilt/etc/PSConfig_7820.psr:system/etc/PSConfig_7820.psr
 
 $(call inherit-product, build/target/product/full.mk)
 $(call inherit-product, vendor/samsung/msm7x27a-common/msm7x27a-common-vendor.mk)

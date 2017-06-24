@@ -1,4 +1,5 @@
 import init.qcom.usb.rc
+import init.qcom.bt.rc
 
 on early-init
     mount debugfs debugfs /sys/kernel/debug
@@ -68,14 +69,33 @@ on post-fs-data
     # set indication (checked by vold) that we have finished this action
     setprop vold.post_fs_data_done 1
 
+    mkdir /data/misc/bluetooth 0770 bluetooth bluetooth
+
 on boot
     # bluetooth and rfkill
+    # Bluetooth
+    exec system/bin/btnvtool -O
+    setprop ro.bt.bdaddr_path "/efs/bluetooth/bt_addr"
+    setprop bluetooth.status off
+    chown bluetooth bluetooth ro.bt.bdaddr_path
+    chown bluetooth bluetooth /sys/module/bluetooth_power/parameters/power
     chown bluetooth bluetooth /sys/class/rfkill/rfkill0/type
     chown bluetooth bluetooth /sys/class/rfkill/rfkill0/state
+    chown bluetooth bluetooth /proc/bluetooth/sleep/proto
+    chown bluetooth bluetooth /proc/bcm/sleep/proto
+    chown system system /sys/module/sco/parameters/disable_esco
+    chown bluetooth bluetooth /sys/module/hci_smd/parameters/hcismd_set
+    chmod 0660 /sys/module/bluetooth_power/parameters/power
+    chmod 0660 /sys/module/hci_smd/parameters/hcismd_set
     chmod 0660 /sys/class/rfkill/rfkill0/state
+    chmod 0660 /proc/bluetooth/sleep/proto
+    chmod 0660 /proc/bcm/sleep/proto
     chown bluetooth bluetooth /dev/ttyHS0
     chmod 0660 /dev/ttyHS0
     chown bluetooth bluetooth /sys/devices/platform/msm_serial_hs.0/clock
+    chown 755 /persist
+    chown system radio /efs
+    chmod 0771 /efs
     chmod 0660 /sys/devices/platform/msm_serial_hs.0/clock
 
     # create QMUX deamon socket area
