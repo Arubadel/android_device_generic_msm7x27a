@@ -14,8 +14,6 @@
 
 LOCAL_PATH := $(call my-dir)
 
-SAMSUNG_TARGETS := delos3geur arubaslim
-
-ifneq ($(filter $(SAMSUNG_TARGETS),$(TARGET_DEVICE)),)
+ifneq ($(filter msm7x27a,$(TARGET_BOOTLOADER_BOARD_NAME)),)
 include $(all-subdir-makefiles)
 endif
