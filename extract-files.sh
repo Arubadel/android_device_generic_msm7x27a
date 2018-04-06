@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export VENDOR=samsung
-export DEVICE=msm7x27a-common
+export VENDOR=generic
+export DEVICE=msm7x27a
 
 BASE=../../../vendor/$VENDOR/$DEVICE/proprietary
 rm -rf $BASE/*

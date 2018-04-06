@@ -1,12 +1,25 @@
-CyanogenMod 10.1 common device configuration for Samsung MSM7x27A devices
+CyanogenMod 12.1 common device configuration for Samsung MSM7x27A devices
 
 Curently supports:
 
 	1) Galaxy Core
 	2) Galaxy Win 
-
-Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
+	3) Nokia Xl
+	4) Nokia X
+```
+#
+# Copyright (C) 2018 The Arubadel Open-Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+```

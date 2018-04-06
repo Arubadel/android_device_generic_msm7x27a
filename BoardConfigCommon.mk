@@ -15,6 +15,8 @@
 # BoardConfig.mk
 #
 
+LOCAL_PATH := device/generic/msm7x27a
+
 ## Bootloader
 TARGET_NO_BOOTLOADER := true
 TARGET_NO_RADIOIMAGE := true
@@ -28,7 +30,7 @@ TARGET_BOARD_PLATFORM_GPU := qcom-adreno200
 TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
 TARGET_CPU_VARIANT := cortex-a9
-TARGET_SPECIFIC_HEADER_PATH := device/samsung/msm7x27a-common/include
+TARGET_SPECIFIC_HEADER_PATH := $(LOCAL_PATH)/include
 TARGET_USE_QCOM_BIONIC_OPTIMIZATION := true
 ARCH_ARM_HAVE_TLS_REGISTER := true
 TARGET_GLOBAL_CFLAGS += -mtune=cortex-a5 -mfpu=neon-vfpv4 -mfloat-abi=softfp
@@ -74,7 +76,7 @@ USE_OPENGL_RENDERER := true
 TARGET_QCOM_DISPLAY_VARIANT := caf
 TARGET_DOESNT_USE_FENCE_SYNC := true
 BOARD_ADRENO_DECIDE_TEXTURE_TARGET := true
-BOARD_EGL_CFG := device/samsung/msm7x27a-common/prebuilt/lib/egl/egl.cfg
+BOARD_EGL_CFG := $(LOCAL_PATH)/prebuilt/lib/egl/egl.cfg
 BOARD_EGL_WORKAROUND_BUG_10194508 := true
 TARGET_RUNNING_WITHOUT_SYNC_FRAMEWORK := true
 TARGET_REQUIRES_SYNCHRONOUS_SETSURFACE := true
@@ -84,7 +86,7 @@ TARGET_USES_QCOM_BSP := true
 COMMON_GLOBAL_CFLAGS += -DQCOM_BSP
 
 ## GPS
-QCOM_GPS_PATH := device/samsung/msm7x27a-common/gps
+QCOM_GPS_PATH := $(LOCAL_PATH)/gps
 BOARD_USES_QCOM_LIBRPC := true
 BOARD_USES_QCOM_GPS := true
 
@@ -106,7 +108,7 @@ BOARD_USES_LEGACY_RIL := true
 BOARD_PROVIDES_LIBRIL := true
 BOARD_PROVIDES_RIL_REFERENCE := true
 BOARD_MOBILEDATA_INTERFACE_NAME := "pdp0"
-BOARD_RIL_CLASS := ../../../device/samsung/msm7x27a-common/ril/
+BOARD_RIL_CLASS := ../../../$(LOCAL_PATH)/ril/
 COMMON_GLOBAL_CFLAGS += -DRIL_SUPPORTS_SEEK
 COMMON_GLOBAL_CFLAGS += -DRIL_VARIANT_LEGACY
 
@@ -143,14 +145,14 @@ TARGET_PROVIDES_LIBLIGHTS := true
 BOARD_HAL_STATIC_LIBRARIES := libhealthd.msm7x27a
 
 # Misc.
-TARGET_SYSTEM_PROP := device/samsung/msm7x27a-common/system.prop
+TARGET_SYSTEM_PROP := $(LOCAL_PATH)/system.prop
 
 # Webview
 
 #PRODUCT_PREBUILT_WEBVIEWCHROMIUM := yes
 
 BOARD_SEPOLICY_DIRS += \
-       device/samsung/msm7x27a-common/sepolicy
+       $(LOCAL_PATH)/sepolicy
 
 BOARD_SEPOLICY_UNION += \
        file_contexts \
@@ -176,7 +178,7 @@ BOARD_SEPOLICY_UNION += \
        thermal-engine.te \
 
 ## Recovery
-TARGET_RECOVERY_FSTAB := device/samsung/msm7x27a-common/rootdir/fstab.qcom
+TARGET_RECOVERY_FSTAB := $(LOCAL_PATH)/rootdir/fstab.qcom
 TARGET_RECOVERY_LCD_BACKLIGHT_PATH := \"/sys/class/leds/lcd-backlight/brightness\"
 TARGET_RECOVERY_SWIPE := true
 TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888

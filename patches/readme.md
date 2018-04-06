@@ -4,7 +4,7 @@ Notice: too apply patch run
 
 ```
 
-patch -p1 <device/samsung/msm7x27a-common/patch/patch.diff
+patch -p1 <device/generic/msm7x27a/patch/patch.diff
 
 ```
 
@@ -12,6 +12,6 @@ patch -p1 <device/samsung/msm7x27a-common/patch/patch.diff
 
 ```
 
-patch -p1 -R <device/samsung/msm7x27a-common/patch/patch.diff
+patch -p1 -R <device/generic/msm7x27a/patch/patch.diff
 
 ```
