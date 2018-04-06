@@ -178,7 +178,6 @@ BOARD_SEPOLICY_UNION += \
        thermal-engine.te \
 
 ## Recovery
-TARGET_RECOVERY_FSTAB := $(LOCAL_PATH)/rootdir/fstab.qcom
 TARGET_RECOVERY_LCD_BACKLIGHT_PATH := \"/sys/class/leds/lcd-backlight/brightness\"
 TARGET_RECOVERY_SWIPE := true
 TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
