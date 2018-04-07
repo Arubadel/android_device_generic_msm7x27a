@@ -53,7 +53,8 @@ PRODUCT_PACKAGES += \
     lights.msm7x27a \
     gps.msm7x27a \
     power.msm7x27a \
-    libhealthd.msm7x27a
+    libhealthd.msm7x27a \
+    libxml2
 
 # Bluetooth
 PRODUCT_PACKAGES += \
