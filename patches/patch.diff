@@ -178,6 +178,18 @@ index 7c81570..2134ab4 100644
      if (mFlags & FLAG_USE_SURFACE_INPUT) {
          mOutputFormat->setInt32("create-input-buffers-suspended", 1);
      }
+diff --git a/frameworks/av/media/libstagefright/Utils.cpp b/frameworks/av/media/libstagefright/Utils.cpp
+index 90964ef..e80e415 100644
+--- a/frameworks/av/media/libstagefright/Utils.cpp
++++ b/frameworks/av/media/libstagefright/Utils.cpp
+@@ -821,7 +821,6 @@ static const struct mime_conv_t mimeLookup[] = {
+     { MEDIA_MIMETYPE_AUDIO_QCELP,       AUDIO_FORMAT_QCELP },
+     { MEDIA_MIMETYPE_AUDIO_WMA,         AUDIO_FORMAT_WMA },
+     { MEDIA_MIMETYPE_AUDIO_FLAC,        AUDIO_FORMAT_FLAC },
+-    { MEDIA_MIMETYPE_CONTAINER_QTIFLAC, AUDIO_FORMAT_FLAC },
+ #ifdef DOLBY_UDC
+     { MEDIA_MIMETYPE_AUDIO_EAC3_JOC,    AUDIO_FORMAT_E_AC3_JOC },
+ #endif
 diff --git a/frameworks/base/media/java/android/media/AudioService.java b/frameworks/base/media/java/android/media/AudioService.java
 index 41dc270..e385976 100644
 --- a/frameworks/base/media/java/android/media/AudioService.java
@@ -236,6 +248,53 @@ index 9770da2..f810f0c 100644
  ifeq ($(TARGET_SAMSUNG_GRALLOC_EXTERNAL_USECASES),true)
  	LOCAL_CFLAGS += -DSAMSUNG_GRALLOC_EXTERNAL_USECASES
  endif
+diff --git a/frameworks/native/libs/gui/BufferQueueProducer.cpp b/frameworks/native/libs/gui/BufferQueueProducer.cpp
+index 6f76019..b700365 100644
+--- a/frameworks/native/libs/gui/BufferQueueProducer.cpp
++++ b/frameworks/native/libs/gui/BufferQueueProducer.cpp
+@@ -204,7 +204,8 @@ status_t BufferQueueProducer::waitForFreeSlotThenRelock(const char* caller,
+             const int newUndequeuedCount =
+                 maxBufferCount - (dequeuedCount + 1);
+             const int minUndequeuedCount =
+-                mCore->getMinUndequeuedBufferCountLocked(async);
++                // HACK: for some reason, we need to reduce min undequeue for screen recording
++                mCore->getMinUndequeuedBufferCountLocked(false);
+             if (newUndequeuedCount < minUndequeuedCount) {
+                 BQ_LOGE("%s: min undequeued buffer count (%d) exceeded "
+                         "(dequeued=%d undequeued=%d)",
+diff --git a/lframeworks/native/ibs/gui/SensorEventQueue.cpp b/frameworks/native/libs/gui/SensorEventQueue.cpp
+index 1305e9f..19fda25 100644
+--- a/frameworks/native/libs/gui/SensorEventQueue.cpp
++++ b/frameworks/native/libs/gui/SensorEventQueue.cpp
+@@ -130,8 +130,12 @@ status_t SensorEventQueue::disableSensor(Sensor const* sensor) const {
+ 
+ status_t SensorEventQueue::enableSensor(int32_t handle, int32_t samplingPeriodUs,
+                                         int maxBatchReportLatencyUs, int reservedFlags) const {
+-    return mSensorEventConnection->enableDisable(handle, true, us2ns(samplingPeriodUs),
+-                                                 us2ns(maxBatchReportLatencyUs), reservedFlags);
++    status_t err = mSensorEventConnection->enableDisable(handle, true, us2ns(samplingPeriodUs),
++                                                  us2ns(maxBatchReportLatencyUs), reservedFlags);
++    if (err == NO_ERROR) {
++        mSensorEventConnection->setEventRate(handle, us2ns(samplingPeriodUs));
++    }
++    return err;
+ }
+ 
+ status_t SensorEventQueue::flush() const {
+diff --git a/frameworks/native/services/surfaceflinger/SurfaceFlinger.cpp b/frameworks/native/services/surfaceflinger/SurfaceFlinger.cpp
+index ca3f027..05554b0 100644
+--- a/frameworks/native/services/surfaceflinger/SurfaceFlinger.cpp
++++ b/frameworks/native/services/surfaceflinger/SurfaceFlinger.cpp
+@@ -3746,6 +3746,9 @@ status_t SurfaceFlinger::captureScreenImplLocked(
+         bool useIdentityTransform, Transform::orientation_flags rotation,
+         bool useReadPixels)
+ {
++// Rotation artifact problems when useReadPixels is false
++    useReadPixels = true;
++
+     ATRACE_CALL();
+ 
+     // get screen geometry
 diff --git a/frameworks/native/services/surfaceflinger/Android.mk b/frameworks/native/services/surfaceflinger/Android.mk
 index f9a6852..69a6cd3 100644
 --- a/frameworks/native/services/surfaceflinger/Android.mk
