@@ -136,11 +136,6 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/prebuilt/etc/init.qcom.fm.sh:/system/etc/init.qcom.fm.sh
 
-## Init.d
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/prebuilt/etc/init.d/70rild:system/etc/init.d/70rild \
-    $(LOCAL_PATH)/prebuilt/etc/init.d/90logcat:system/etc/init.d/90logcat \
-
 #Rild
 PRODUCT_PACKAGES += \
 	rild2
@@ -177,6 +172,10 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/prebuilt/etc/calib.dat:system/etc/calib.dat \
     $(LOCAL_PATH)/prebuilt/etc/param.dat:system/etc/param.dat \
     $(LOCAL_PATH)/prebuilt/etc/sensors.dat:system/etc/sensors.dat
+
+# OTA scripts
+PRODUCT_COPY_FILES += \
+	$(LOCAL_PATH)/releasetools/run_scripts.sh:install/bin/run_scripts.sh
 
 $(call inherit-product, build/target/product/full.mk)
 $(call inherit-product, vendor/generic/msm7x27a/msm7x27a-vendor.mk)
