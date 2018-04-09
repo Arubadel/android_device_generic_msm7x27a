@@ -369,8 +369,8 @@ index bb1202c..e7ad15a 100755
  
  QSD8K_BOARD_PLATFORMS := qsd8k
 
---- a/frameworks/av/media/frameworks/av/libmedia/Android.mk
-+++ b/frameworks/av/media/frameworks/av/libmedia/Android.mk
+--- a/frameworks/av/media/libmedia/Android.mk
++++ b/frameworks/av/media/libmedia/Android.mk
 @@ -77,7 +77,7 @@ LOCAL_SRC_FILES:= \
  LOCAL_SRC_FILES += ../libnbaio/roundup.c
  
