@@ -88,7 +88,8 @@ PRODUCT_PACKAGES += \
 
 ## Prebuilt Webview
 PRODUCT_PACKAGES += \
-	libwebviewchromium
+	libwebviewchromium \
+	webview
 
 ## Device Custom Settings
 PRODUCT_PACKAGES += \
