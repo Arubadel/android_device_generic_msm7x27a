@@ -30,7 +30,6 @@ TARGET_BOARD_PLATFORM_GPU := qcom-adreno200
 TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
 TARGET_CPU_VARIANT := cortex-a9
-TARGET_SPECIFIC_HEADER_PATH := $(LOCAL_PATH)/include
 TARGET_USE_QCOM_BIONIC_OPTIMIZATION := true
 ARCH_ARM_HAVE_TLS_REGISTER := true
 TARGET_GLOBAL_CFLAGS += -mtune=cortex-a5 -mfpu=neon-vfpv4 -mfloat-abi=softfp
@@ -198,3 +197,10 @@ BOARD_USERDATAIMAGE_PARTITION_SIZE := 979369984
 
 # Release tools extention
 TARGET_RELEASETOOLS_EXTENSIONS := $(LOCAL_PATH)/releasetools
+
+#Includes
+ifeq ($(TARGET_HYBRID_DISPLAY),true)
+TARGET_SPECIFIC_HEADER_PATH := $(LOCAL_PATH)/include/hybrid/
+else
+TARGET_SPECIFIC_HEADER_PATH := $(LOCAL_PATH)/include/legacy/
+endif
